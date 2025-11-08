@@ -6,7 +6,6 @@ local Workspace = game:GetService("Workspace")
 local Lighting = game:GetService("Lighting")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterGui = game:GetService("StarterGui")
-local StarterPlayer = game:GetService("StarterPlayer")
 local VirtualUser = game:GetService("VirtualUser")
 local LP = Players.LocalPlayer
 
@@ -50,6 +49,7 @@ local TabPlayer = Window:CreateTab("ผู้เล่น")
 local TabTP = Window:CreateTab("TP")
 local TabDiscord = Window:CreateTab("Discord")
 
+
 -------------------------------------------------
 -- 🔗 Discord
 -------------------------------------------------
@@ -60,13 +60,13 @@ TabDiscord:CreateButton({
 		local link = "https://discord.gg/U8qEGaNe6E"
 		if setclipboard then
 			setclipboard(link)
-			game.StarterGui:SetCore("SendNotification", {
+			StarterGui:SetCore("SendNotification", {
 				Title = "✅ ลิงก์ถูกคัดลอกแล้ว!",
 				Text = link,
 				Duration = 5
 			})
 		else
-			game.StarterGui:SetCore("SendNotification", {
+			StarterGui:SetCore("SendNotification", {
 				Title = "⚠️ ไม่สามารถคัดลอกได้",
 				Text = "Executor ของคุณไม่รองรับ setclipboard",
 				Duration = 5
@@ -80,7 +80,6 @@ TabDiscord:CreateButton({
 -------------------------------------------------
 TabPlayer:CreateSection("ตั้งค่าต่างๆ")
 
--- 🏃 ปรับความเร็ว
 local SpeedSlider = TabPlayer:CreateSlider({
 	Name = "ปรับความเร็ว",
 	Range = {16, 700},
@@ -95,7 +94,6 @@ local SpeedSlider = TabPlayer:CreateSlider({
 	end
 })
 
--- 🦘 ปรับความสูงการกระโดด
 local JumpSlider = TabPlayer:CreateSlider({
 	Name = "ปรับความสูงการกระโดด",
 	Range = {50, 500},
@@ -111,7 +109,6 @@ local JumpSlider = TabPlayer:CreateSlider({
 	end
 })
 
--- 🔄 ปุ่มรีเซ็ตค่า
 TabPlayer:CreateButton({
 	Name = "รีเซ็ตค่าทั้งหมด",
 	Callback = function()
@@ -122,6 +119,7 @@ TabPlayer:CreateButton({
 		end
 		SpeedSlider:Set(16)
 		JumpSlider:Set(50)
+
 		Rayfield:Notify({
 			Title = "รีเซ็ตสำเร็จ!",
 			Content = "กลับไปค่าปกติแล้ว ✅",
@@ -142,19 +140,12 @@ TabPlayer:CreateButton({
 	Name = "เปิด / ปิด เดินทะลุ",
 	Callback = function()
 		noclipEnabled = not noclipEnabled
-		if noclipEnabled then
-			Rayfield:Notify({
-				Title = "Noclip เปิดทำงานแล้ว ✅",
-				Content = "สามารถเดินทะลุสิ่งกีดขวางได้",
-				Duration = 3
-			})
-		else
-			Rayfield:Notify({
-				Title = "Noclip ปิดการทำงานแล้ว ❌",
-				Content = "กลับมาเดินชนปกติ",
-				Duration = 3
-			})
-		end
+		local status = noclipEnabled and "✅ เปิดใช้งาน" or "❌ ปิดแล้ว"
+		Rayfield:Notify({
+			Title = "Noclip",
+			Content = status,
+			Duration = 3
+		})
 	end
 })
 
@@ -169,12 +160,12 @@ RunService.Stepped:Connect(function()
 end)
 
 -------------------------------------------------
--- 💡 โหมดแสงสว่าง (FullBright)
+-- 💡 FullBright
 -------------------------------------------------
 TabPlayer:CreateSection("แสงสว่าง")
 
 local FullBrightEnabled = false
-local connection
+local FBConnection
 
 TabPlayer:CreateButton({
 	Name = "🔆 เปิดโหมดแมพสว่าง (FullBright)",
@@ -182,7 +173,7 @@ TabPlayer:CreateButton({
 		FullBrightEnabled = not FullBrightEnabled
 
 		if FullBrightEnabled then
-			connection = RunService.RenderStepped:Connect(function()
+			FBConnection = RunService.RenderStepped:Connect(function()
 				Lighting.Brightness = 2
 				Lighting.ClockTime = 14
 				Lighting.FogEnd = 1e10
@@ -191,11 +182,11 @@ TabPlayer:CreateButton({
 			end)
 			Rayfield:Notify({
 				Title = "เปิด FullBright ☀️",
-				Content = "แมปจะสว่างถาวร",
+				Content = "แมปสว่างถาวรแล้ว",
 				Duration = 2
 			})
 		else
-			if connection then connection:Disconnect() end
+			if FBConnection then FBConnection:Disconnect() end
 			Lighting.GlobalShadows = true
 			Rayfield:Notify({
 				Title = "ปิด FullBright 🌑",
@@ -207,24 +198,25 @@ TabPlayer:CreateButton({
 })
 
 -------------------------------------------------
--- ✈️ ฟังก์ชันบิน
+-- 🕊️ ฟังก์ชันบิน
 -------------------------------------------------
 TabPlayer:CreateSection("ฟังก์ชันบิน")
 TabPlayer:CreateButton({
 	Name = "กดเพื่อเปิดสคริปต์บิน",
-    Callback = function()
-		loadstring(game:HttpGet("https://gist.githubusercontent.com/meozoneYT/bf037dff9f0a70017304ddd67fdcd370/raw/e14e74f425b060df523343cf30b787074eb3c5d2/Arceus%20X%20Fly%202%20OBFLUCATOR"))()
+	Callback = function()
+		local url = "https://gist.githubusercontent.com/meozoneYT/bf037dff9f0a70017304ddd67fdcd370/raw/e14e74f425b060df523343cf30b787074eb3c5d2/Arceus%20X%20Fly%20OBF.lua"
+		loadstring(game:HttpGet(url))()
 	end
 })
 
 -------------------------------------------------
--- 🧭 ระบบวาร์ป (Teleport + Spectate)
+-- 🧭 เทเลพอร์ต / มองผู้เล่น
 -------------------------------------------------
 TabTP:CreateSection("วาร์ป")
 
-local player = Players.LocalPlayer
-local camera = Workspace.CurrentCamera
-local targetPlayer = nil
+local player = LP
+local camera = workspace.CurrentCamera
+local targetPlayer
 local spectating = false
 
 local function GetPlayerList()
@@ -244,17 +236,13 @@ local PlayerDropdown = TabTP:CreateDropdown({
 	MultipleOptions = false,
 	Flag = "PlayerTeleportDropdown",
 	Callback = function(Option)
-		local selectedName = Option[1]
-		targetPlayer = Players:FindFirstChild(selectedName)
+		targetPlayer = Players:FindFirstChild(Option[1])
 	end
 })
 
 TabTP:CreateButton({
 	Name = "⚡ วาร์ปไปหาผู้เล่น",
 	Callback = function()
-		local myChar = player.Character or player.CharacterAdded:Wait()
-		local myRoot = myChar:FindFirstChild("HumanoidRootPart")
-
 		if not targetPlayer then
 			return Rayfield:Notify({
 				Title = "⚠️ ยังไม่ได้เลือกผู้เล่น",
@@ -262,11 +250,10 @@ TabTP:CreateButton({
 				Duration = 2
 			})
 		end
-
+		local myChar = player.Character or player.CharacterAdded:Wait()
+		local myRoot = myChar:FindFirstChild("HumanoidRootPart")
 		local targetChar = targetPlayer.Character or targetPlayer.CharacterAdded:Wait()
 		local targetRoot = targetChar:FindFirstChild("HumanoidRootPart")
-			or targetChar:FindFirstChild("LowerTorso")
-			or targetChar:FindFirstChild("Torso")
 
 		if myRoot and targetRoot then
 			myRoot.CFrame = targetRoot.CFrame + Vector3.new(0, 3, 0)
@@ -295,25 +282,24 @@ TabTP:CreateButton({
 				Duration = 2
 			})
 		end
-
 		spectating = not spectating
-
 		if spectating then
 			camera.CameraSubject = targetPlayer.Character:WaitForChild("Humanoid")
+			camera.CameraType = Enum.CameraType.Custom
 			Rayfield:Notify({
 				Title = "🎥 เริ่มมองผู้เล่น",
 				Content = "กำลังมอง: " .. targetPlayer.Name,
 				Duration = 2
 			})
-
 			targetPlayer.CharacterAdded:Connect(function(newChar)
-				task.wait(1)
 				if spectating then
+					task.wait(1)
 					camera.CameraSubject = newChar:WaitForChild("Humanoid")
 				end
 			end)
 		else
 			camera.CameraSubject = player.Character:WaitForChild("Humanoid")
+			camera.CameraType = Enum.CameraType.Custom
 			Rayfield:Notify({
 				Title = "👁️ หยุดมองผู้เล่น",
 				Content = "กลับมามองตัวเองแล้ว",
@@ -327,6 +313,7 @@ Players.PlayerAdded:Connect(function()
 	task.wait(1)
 	PlayerDropdown:Refresh(GetPlayerList(), true)
 end)
+
 Players.PlayerRemoving:Connect(function()
 	task.wait(1)
 	PlayerDropdown:Refresh(GetPlayerList(), true)
