@@ -415,45 +415,7 @@ TabMenu:CreateButton({
         end
     end
 })
--------------------------------------------------
--- ♾️ Infinite Energy
--------------------------------------------------
-TabMenu:CreateToggle({
-    Name = "♾️ พลังงานไม่ลด (Infinite Energy)",
-    CurrentValue = false,
-    Callback = function(Value)
-        getgenv().InfiniteEnergy = Value
 
-        if Value then
-            Rayfield:Notify({
-                Title = "Infinite Energy ♾️",
-                Content = "เปิดใช้งานแล้ว พลังงานจะไม่ลด!",
-                Duration = 3
-            })
-
-            task.spawn(function()
-                while getgenv().InfiniteEnergy do
-                    local energyObj = workspace:FindFirstChild("World")
-                        and workspace.World:FindFirstChild("Lives")
-                        and workspace.World.Lives:FindFirstChild("79CGQ")
-                        and workspace.World.Lives["79CGQ"]:FindFirstChild("Energy")
-
-                    if energyObj then
-                        energyObj.Value = 100 -- กำหนดเต็มตลอด
-                    end
-
-                    task.wait(0.1)
-                end
-            end)
-        else
-            Rayfield:Notify({
-                Title = "Infinite Energy ❌",
-                Content = "ปิดการทำงานแล้ว พลังงานจะกลับมาปกติ",
-                Duration = 3
-            })
-        end
-    end
-})
 -------------------------------------------------
 -- 📦 โหลดการตั้งค่า
 -------------------------------------------------
