@@ -45,9 +45,9 @@ local Window = Rayfield:CreateWindow({
 -------------------------------------------------
 -- 📁 แท็บต่าง ๆ
 -------------------------------------------------
-local TabPlayer = Window:CreateTab("ผู้เล่น")
-local TabTP = Window:CreateTab("TP")
 local TabMenu = Window:CreateTab("เมนูหลัก")
+local TabPlayer = Window:CreateTab("ปรับค่าต่างๆ")
+local TabTP = Window:CreateTab("TP")
 local TabDiscord = Window:CreateTab("Discord")
 
 
