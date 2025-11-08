@@ -415,7 +415,9 @@ TabMenu:CreateButton({
         end
     end
 })
+-------------------------------------------------
 -- ♾️ Infinite Stamina
+-------------------------------------------------
 TabMenu:CreateToggle({
 	Name = "♾️ Infinite Stamina",
 	CurrentValue = false,
@@ -423,6 +425,7 @@ TabMenu:CreateToggle({
 		local player = game.Players.LocalPlayer
 		local RunService = game:GetService("RunService")
 
+		-- ตรวจหา Energy ของผู้เล่น
 		local world = workspace:FindFirstChild("World")
 		if not world then
 			Rayfield:Notify({
@@ -463,9 +466,8 @@ TabMenu:CreateToggle({
 			return
 		end
 
-		-- สร้าง/ยกเลิกการเชื่อมต่อ Loop
+		-- เริ่ม/หยุด Loop เติมพลัง
 		if Value then
-			-- เปิดโหมดอินฟินิตี้
 			_G.InfiniteStaminaLoop = RunService.Heartbeat:Connect(function()
 				pcall(function()
 					energyValue.Value = 100 -- เติมพลังเต็มตลอด
@@ -477,7 +479,6 @@ TabMenu:CreateToggle({
 				Duration = 3
 			})
 		else
-			-- ปิดโหมดอินฟินิตี้
 			if _G.InfiniteStaminaLoop then
 				_G.InfiniteStaminaLoop:Disconnect()
 				_G.InfiniteStaminaLoop = nil
@@ -490,7 +491,6 @@ TabMenu:CreateToggle({
 		end
 	end
 })
-
 -------------------------------------------------
 -- 📦 โหลดการตั้งค่า
 -------------------------------------------------
