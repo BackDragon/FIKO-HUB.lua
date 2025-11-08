@@ -52,56 +52,92 @@ TabDiscord:CreateButton({
     end,
 })
 
+-------------------------------------------------
+-- ⚙️ ตั้งค่าความเร็ว + กระโดดสูง
+-------------------------------------------------
 TabPlayer:CreateSection("ตั้งค่าต่างๆ")
-local SpeedSlider = Tab:CreateSlider({
-Name = "ปรับความเร็ว",
-Range = {16, 700},
-Increment = 1,
-Suffix = "Speed",
-CurrentValue = 16,
-Callback = function(Value)
-local humanoid = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-if humanoid then
-humanoid.WalkSpeed = Value
-end
-end
+
+-- 🏃‍♂️ วิ่งเร็ว
+local SpeedLockToggle = TabPlayer:CreateToggle({
+	Name = "เปิดวิ่งเร็ว",
+	CurrentValue = false,
+	Flag = "SpeedLock",
+	Callback = function(state)
+		speedEnforced = state
+		local h = speedHumanoid
+		if not h or not h.Parent then return end
+		if state then
+			if not speedTickConn then
+				speedLastTick = 0
+				speedTickConn = RunService.Heartbeat:Connect(heartbeat)
+			end
+			if canEnforce() then setWalkSpeed(h, speedCurrent) end
+			Rayfield:Notify({
+				Title = "Speed",
+				Content = "✅ เปิดใช้งานวิ่งเร็วแล้ว",
+				Duration = 3
+			})
+		else
+			disconnectAll()
+			applyDisabledState()
+			Rayfield:Notify({
+				Title = "Speed",
+				Content = "❌ ปิดวิ่งเร็วแล้ว",
+				Duration = 3
+			})
+		end
+	end
 })
 
--- 🦘 ปรับความสูงการกระโดด
-local JumpSlider = Tab:CreateSlider({
-Name = "ปรับความสูงการกระโดด",
-Range = {50, 500},
-Increment = 10,
-Suffix = "Power",
-CurrentValue = 50,
-Callback = function(Value)
-local humanoid = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-if humanoid then
-humanoid.UseJumpPower = true
-humanoid.JumpPower = Value
-end
-end
+-- 🔧 ปรับค่าความเร็ว
+TabPlayer:CreateSlider({
+	Name = "เลือกความเร็ว",
+	Range = {0, 200},
+	Increment = 1,
+	CurrentValue = 16,
+	Flag = "WalkSpeed",
+	Callback = function(v)
+		speedCurrent = v
+		if speedEnforced and canEnforce() then
+			setWalkSpeed(speedHumanoid, speedCurrent)
+		end
+	end
 })
 
--- 🔄 ปุ่มรีเซ็ตค่า
-Tab:CreateButton({
-Name = "รีเซ็ตค่าทั้งหมด",
-Callback = function()
-local humanoid = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
-if humanoid then
-humanoid.WalkSpeed = 16
-humanoid.JumpPower = 50
-end
+-- 🦘 ปรับค่ากระโดดสูง
+local jumpPowerCurrent = 50
+TabPlayer:CreateSlider({
+	Name = "เลือกความสูงกระโดด",
+	Range = {0, 300},
+	Increment = 5,
+	CurrentValue = 50,
+	Flag = "JumpPower",
+	Callback = function(v)
+		jumpPowerCurrent = v
+		local h = speedHumanoid
+		if h and h.Parent then
+			h.JumpPower = v
+		end
+	end
+})
 
--- รีเซ็ตค่าบน UI กลับไปเหมือนตอนเริ่ม  
-  SpeedSlider:Set(16)  
-  JumpSlider:Set(50)  
-
-  Rayfield:Notify({  
-     Title = "รีเซ็ตสำเร็จ!",  
-     Content = "กลับไปค่าปกติแล้ว",  
-     Duration = 3,  
-     Image = 4483362458, -- ไอคอนเล็ก ๆ (เลือกเปลี่ยนได้)  
-  })
+-- ♻️ รีเซ็ทความเร็ว + กระโดดสูง
+TabPlayer:CreateButton({
+	Name = "รีเซ็ทค่าความเร็วและกระโดด",
+	Callback = function()
+		speedCurrent = canonicalDefault()
+		jumpPowerCurrent = 50
+		local h = speedHumanoid
+		if h and h.Parent then
+			h.WalkSpeed = speedCurrent
+			h.JumpPower = jumpPowerCurrent
+			Rayfield:Notify({
+				Title = "รีเซ็ทสำเร็จ",
+				Content = "ตั้งค่าความเร็วและกระโดดกลับค่าเริ่มต้นแล้ว ✅",
+				Duration = 3
+			})
+		end
+	end
+})
 
 Rayfield:LoadConfiguration()
