@@ -52,6 +52,7 @@ TabDiscord:CreateButton({
     end,
 })
 
+TabPlayer:CreateSection("ตั้งค่าต่างๆ")
 local SpeedSlider = Tab:CreateSlider({
 Name = "ปรับความเร็ว",
 Range = {16, 700},
