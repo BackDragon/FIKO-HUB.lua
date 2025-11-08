@@ -1,10 +1,30 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
-local Window   = Rayfield:CreateWindow({
-    Name="VD & FIKO",
-    LoadingTitle="FIKO HUB",
-    LoadingSubtitle="By FIKO",
-    ConfigurationSaving={Enabled=true,FolderName="FIKO HUB",FileName="FIKO"},
-    KeySystem=false
+
+-- สร้างหน้าต่าง
+local Window = Rayfield:CreateWindow({
+Name = "FIKO HUB",
+Icon = 0,
+LoadingTitle = "เมนูหลัก",
+LoadingSubtitle = "FIKO HUB",
+Theme = "Default",
+
+DisableRayfieldPrompts = true,
+DisableBuildWarnings = true,
+
+ConfigurationSaving = {
+Enabled = true,
+FolderName = "FIKO HUB",
+FileName = "FIKO HUB"
+},
+
+Discord = {
+Enabled = false,
+Invite = "https://discord.gg/U8qEGaNe6E",
+RememberJoins = true
+},
+
+KeySystem = false
+})
 
 local TabPlayer= Window:CreateTab("ผู้เล่น")
 local TabESP   = Window:CreateTab("ESP")
@@ -13,4 +33,4 @@ local TabVisual= Window:CreateTab("ปรับแสง")
 local TabMisc  = Window:CreateTab("ตั้งค่าช่วยเล่น")
 local TabDiscord=Window:CreateTab("Discord")
 
-  Rayfield:LoadConfiguration()
+Rayfield:LoadConfiguration()
