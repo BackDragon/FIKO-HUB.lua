@@ -1,143 +1,144 @@
+-- 🧠 ส่วนหัวหลัก (FIKO HUB)
+-------------------------------------------------
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
+local Lighting = game:GetService("Lighting")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local StarterGui = game:GetService("StarterGui")
+local StarterPlayer = game:GetService("StarterPlayer")
+local VirtualUser = game:GetService("VirtualUser")
+local LP = Players.LocalPlayer
+
+-------------------------------------------------
+-- ⚙️ โหลด Rayfield UI
+-------------------------------------------------
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
--- สร้างหน้าต่าง
+-------------------------------------------------
+-- 🪟 สร้างหน้าต่างหลัก
+-------------------------------------------------
 local Window = Rayfield:CreateWindow({
-Name = "FIKO HUB",
-Icon = 0,
-LoadingTitle = "เมนูหลัก",
-LoadingSubtitle = "FIKO HUB",
-Theme = "Default",
+	Name = "FIKO HUB",
+	Icon = 0,
+	LoadingTitle = "เมนูหลัก",
+	LoadingSubtitle = "FIKO HUB",
+	Theme = "Default",
 
-DisableRayfieldPrompts = true,
-DisableBuildWarnings = true,
+	DisableRayfieldPrompts = true,
+	DisableBuildWarnings = true,
 
-ConfigurationSaving = {
-Enabled = true,
-FolderName = "FIKO HUB",
-FileName = "FIKO HUB"
-},
+	ConfigurationSaving = {
+		Enabled = true,
+		FolderName = "FIKO HUB",
+		FileName = "FIKO HUB"
+	},
 
-Discord = {
-Enabled = false,
-Invite = "https://discord.gg/U8qEGaNe6E",
-RememberJoins = true
-},
+	Discord = {
+		Enabled = false,
+		Invite = "https://discord.gg/U8qEGaNe6E",
+		RememberJoins = true
+	},
 
-KeySystem = false
-})
-
-local TabPlayer= Window:CreateTab("ผู้เล่น")
-local TabESP   = Window:CreateTab("ESP")
-local TabDiscord=Window:CreateTab("Discord")
-
-TabDiscord:CreateSection("กดเพื่อเอาลิ้งดิส")
-TabDiscord:CreateButton({
-    Name = "📋 Copy Discord Link",
-    Callback = function()
-        local link = "https://discord.gg/U8qEGaNe6E"
-        if setclipboard then
-            setclipboard(link)
-            game.StarterGui:SetCore("SendNotification", {
-                Title = "✅ ลิงก์ถูกคัดลอกแล้ว!",
-                Text = link,
-                Duration = 5
-            })
-        else
-            game.StarterGui:SetCore("SendNotification", {
-                Title = "⚠️ ไม่สามารถคัดลอกได้",
-                Text = "Executor ของคุณไม่รองรับ setclipboard",
-                Duration = 5
-            })
-        end
-    end,
+	KeySystem = false
 })
 
 -------------------------------------------------
--- ⚙️ ตั้งค่าความเร็ว + กระโดดสูง
+-- 📁 แท็บต่าง ๆ
+-------------------------------------------------
+local TabPlayer = Window:CreateTab("ผู้เล่น")
+local TabDiscord = Window:CreateTab("Discord")
+
+-------------------------------------------------
+-- 🔗 Discord
+-------------------------------------------------
+TabDiscord:CreateSection("กดเพื่อเอาลิ้งดิส")
+TabDiscord:CreateButton({
+	Name = "📋 Copy Discord Link",
+	Callback = function()
+		local link = "https://discord.gg/U8qEGaNe6E"
+		if setclipboard then
+			setclipboard(link)
+			game.StarterGui:SetCore("SendNotification", {
+				Title = "✅ ลิงก์ถูกคัดลอกแล้ว!",
+				Text = link,
+				Duration = 5
+			})
+		else
+			game.StarterGui:SetCore("SendNotification", {
+				Title = "⚠️ ไม่สามารถคัดลอกได้",
+				Text = "Executor ของคุณไม่รองรับ setclipboard",
+				Duration = 5
+			})
+		end
+	end,
+})
+
+-------------------------------------------------
+-- ⚙️ ตั้งค่าความเร็ว + กระโดด
 -------------------------------------------------
 TabPlayer:CreateSection("ตั้งค่าต่างๆ")
 
--- 🏃‍♂️ วิ่งเร็ว
-local SpeedLockToggle = TabPlayer:CreateToggle({
-	Name = "เปิดวิ่งเร็ว",
-	CurrentValue = false,
-	Flag = "SpeedLock",
-	Callback = function(state)
-		speedEnforced = state
-		local h = speedHumanoid
-		if not h or not h.Parent then return end
-		if state then
-			if not speedTickConn then
-				speedLastTick = 0
-				speedTickConn = RunService.Heartbeat:Connect(heartbeat)
-			end
-			if canEnforce() then setWalkSpeed(h, speedCurrent) end
-			Rayfield:Notify({
-				Title = "Speed",
-				Content = "✅ เปิดใช้งานวิ่งเร็วแล้ว",
-				Duration = 3
-			})
-		else
-			disconnectAll()
-			applyDisabledState()
-			Rayfield:Notify({
-				Title = "Speed",
-				Content = "❌ ปิดวิ่งเร็วแล้ว",
-				Duration = 3
-			})
-		end
-	end
-})
-
--- 🔧 ปรับค่าความเร็ว
-TabPlayer:CreateSlider({
-	Name = "เลือกความเร็ว",
-	Range = {0, 200},
+-- 🏃 ปรับความเร็ว
+local SpeedSlider = TabPlayer:CreateSlider({
+	Name = "ปรับความเร็ว",
+	Range = {16, 700},
 	Increment = 1,
+	Suffix = "Speed",
 	CurrentValue = 16,
-	Flag = "WalkSpeed",
-	Callback = function(v)
-		speedCurrent = v
-		if speedEnforced and canEnforce() then
-			setWalkSpeed(speedHumanoid, speedCurrent)
+	Callback = function(Value)
+		local humanoid = LP.Character and LP.Character:FindFirstChildOfClass("Humanoid")
+		if humanoid then
+			humanoid.WalkSpeed = Value
 		end
 	end
 })
 
--- 🦘 ปรับค่ากระโดดสูง
-local jumpPowerCurrent = 50
-TabPlayer:CreateSlider({
-	Name = "เลือกความสูงกระโดด",
-	Range = {0, 300},
-	Increment = 5,
+-- 🦘 ปรับความสูงการกระโดด
+local JumpSlider = TabPlayer:CreateSlider({
+	Name = "ปรับความสูงการกระโดด",
+	Range = {50, 500},
+	Increment = 10,
+	Suffix = "Power",
 	CurrentValue = 50,
-	Flag = "JumpPower",
-	Callback = function(v)
-		jumpPowerCurrent = v
-		local h = speedHumanoid
-		if h and h.Parent then
-			h.JumpPower = v
+	Callback = function(Value)
+		local humanoid = LP.Character and LP.Character:FindFirstChildOfClass("Humanoid")
+		if humanoid then
+			humanoid.UseJumpPower = true
+			humanoid.JumpPower = Value
 		end
 	end
 })
 
--- ♻️ รีเซ็ทความเร็ว + กระโดดสูง
+-- 🔄 ปุ่มรีเซ็ตค่า
 TabPlayer:CreateButton({
-	Name = "รีเซ็ทค่าความเร็วและกระโดด",
+	Name = "รีเซ็ตค่าทั้งหมด",
 	Callback = function()
-		speedCurrent = canonicalDefault()
-		jumpPowerCurrent = 50
-		local h = speedHumanoid
-		if h and h.Parent then
-			h.WalkSpeed = speedCurrent
-			h.JumpPower = jumpPowerCurrent
-			Rayfield:Notify({
-				Title = "รีเซ็ทสำเร็จ",
-				Content = "ตั้งค่าความเร็วและกระโดดกลับค่าเริ่มต้นแล้ว ✅",
-				Duration = 3
-			})
+		local humanoid = LP.Character and LP.Character:FindFirstChildOfClass("Humanoid")
+		if humanoid then
+			humanoid.WalkSpeed = 16
+			humanoid.JumpPower = 50
 		end
+
+		-- รีเซ็ตค่าบน UI กลับไปเหมือนตอนเริ่ม  
+		SpeedSlider:Set(16)
+		JumpSlider:Set(50)
+
+		Rayfield:Notify({
+			Title = "รีเซ็ตสำเร็จ!",
+			Content = "กลับไปค่าปกติแล้ว ✅",
+			Duration = 3,
+			Image = 4483362458 -- ไอคอนเล็ก ๆ (เปลี่ยนได้)
+		})
 	end
 })
 
+-------------------------------------------------
+-- 📦 โหลดการตั้งค่า
+-------------------------------------------------
 Rayfield:LoadConfiguration()
+Rayfield:Notify({
+	Title = "FIKO HUB",
+	Content = "ระบบเมนูโหลดสำเร็จ ✅",
+	Duration = 4
+})
