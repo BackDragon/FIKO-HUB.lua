@@ -415,6 +415,81 @@ TabMenu:CreateButton({
         end
     end
 })
+-- ♾️ Infinite Stamina
+TabMenu:CreateToggle({
+	Name = "♾️ Infinite Stamina",
+	CurrentValue = false,
+	Callback = function(Value)
+		local player = game.Players.LocalPlayer
+		local RunService = game:GetService("RunService")
+
+		local world = workspace:FindFirstChild("World")
+		if not world then
+			Rayfield:Notify({
+				Title = "❌ ไม่พบ World",
+				Content = "ไม่สามารถค้นหา Workspace.World ได้",
+				Duration = 3
+			})
+			return
+		end
+
+		local lives = world:FindFirstChild("Lives")
+		if not lives then
+			Rayfield:Notify({
+				Title = "❌ ไม่พบ Lives Folder",
+				Content = "ไม่พบโฟลเดอร์ Lives ใน World",
+				Duration = 3
+			})
+			return
+		end
+
+		local myData = lives:FindFirstChild(player.Name)
+		if not myData then
+			Rayfield:Notify({
+				Title = "⚠️ ยังไม่พบข้อมูลผู้เล่น",
+				Content = "รอให้ Lives ของคุณโหลดก่อน",
+				Duration = 3
+			})
+			return
+		end
+
+		local energyValue = myData:FindFirstChild("Energy")
+		if not energyValue or not energyValue:IsA("NumberValue") then
+			Rayfield:Notify({
+				Title = "⚠️ ไม่พบ Energy",
+				Content = "เกมนี้อาจเปลี่ยนระบบพลังงาน",
+				Duration = 3
+			})
+			return
+		end
+
+		-- สร้าง/ยกเลิกการเชื่อมต่อ Loop
+		if Value then
+			-- เปิดโหมดอินฟินิตี้
+			_G.InfiniteStaminaLoop = RunService.Heartbeat:Connect(function()
+				pcall(function()
+					energyValue.Value = 100 -- เติมพลังเต็มตลอด
+				end)
+			end)
+			Rayfield:Notify({
+				Title = "♾️ Infinite Stamina",
+				Content = "เปิดใช้งานพลังงานไม่จำกัดแล้ว!",
+				Duration = 3
+			})
+		else
+			-- ปิดโหมดอินฟินิตี้
+			if _G.InfiniteStaminaLoop then
+				_G.InfiniteStaminaLoop:Disconnect()
+				_G.InfiniteStaminaLoop = nil
+			end
+			Rayfield:Notify({
+				Title = "🧘 Infinite Stamina",
+				Content = "ปิดใช้งานพลังงานไม่จำกัดแล้ว",
+				Duration = 3
+			})
+		end
+	end
+})
 
 -------------------------------------------------
 -- 📦 โหลดการตั้งค่า
