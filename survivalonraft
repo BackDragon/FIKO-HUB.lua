@@ -176,6 +176,43 @@ RunService.Stepped:Connect(function()
 	end
 end)
 
+ TabPlayer:CreateSection("แสงสว่าง")
+
+local FullBrightEnabled = false
+local RunService = game:GetService("RunService")
+local lighting = game:GetService("Lighting")
+local connection
+
+TabPlayer:CreateButton({
+	Name = "🔆 เปิดโหมดแมพสว่าง (FullBright)",
+	Callback = function()
+		FullBrightEnabled = not FullBrightEnabled
+
+		if FullBrightEnabled then
+			connection = RunService.RenderStepped:Connect(function()
+				lighting.Brightness = 2
+				lighting.ClockTime = 14
+				lighting.FogEnd = 1e10
+				lighting.GlobalShadows = false
+				lighting.OutdoorAmbient = Color3.new(1, 1, 1)
+			end)
+			Rayfield:Notify({
+				Title = "เปิด FullBright ☀️",
+				Content = "แมปจะสว่างถาวร",
+				Duration = 2
+			})
+		else
+			if connection then connection:Disconnect() end
+			lighting.GlobalShadows = true
+			Rayfield:Notify({
+				Title = "ปิด FullBright 🌑",
+				Content = "กลับสู่สภาพปกติ",
+				Duration = 2
+			})
+		end
+	end
+})
+
 TabPlayer:CreateSection("ฟังชั่นบิน")
 TabPlayer:CreateButton({
 Name = "กดเพื่อเปิดสคริปต์บิน",
