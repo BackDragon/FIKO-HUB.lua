@@ -10,30 +10,7 @@ local StarterPlayer = game:GetService("StarterPlayer")
 local VirtualUser = game:GetService("VirtualUser")
 local LP = Players.LocalPlayer
 
-local function alive(i)
-    if not i then return false end
-    local ok = pcall(function() return i.Parent end)
-    return ok and i.Parent ~= nil
-end
-local function validPart(p) return p and alive(p) and p:IsA("BasePart") end
-local function clamp(n,lo,hi) if n<lo then return lo elseif n>hi then return hi else return n end end
-local function now() return os.clock() end
-local function dist(a,b) return (a-b).Magnitude end
 
-local function firstBasePart(inst)
-    if not alive(inst) then return nil end
-    if inst:IsA("BasePart") then return inst end
-    if inst:IsA("Model") then
-        if inst.PrimaryPart and inst.PrimaryPart:IsA("BasePart") and alive(inst.PrimaryPart) then return inst.PrimaryPart end
-        local p = inst:FindFirstChildWhichIsA("BasePart", true)
-        if validPart(p) then return p end
-    end
-    if inst:IsA("Tool") then
-        local h = inst:FindFirstChild("Handle") or inst:FindFirstChildWhichIsA("BasePart")
-        if validPart(h) then return h end
-    end
-    return nil
-end
 
 local Window   = Rayfield:CreateWindow({
     Name="VD & FIKO",
