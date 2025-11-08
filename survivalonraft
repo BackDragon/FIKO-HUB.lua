@@ -1,0 +1,21 @@
+local Rayfield = loadstring(game:HttpGet("https://sirius.menu/rayfield"))()
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
+local Lighting = game:GetService("Lighting")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local StarterGui = game:GetService("StarterGui")
+local StarterPlayer = game:GetService("StarterPlayer")
+local VirtualUser = game:GetService("VirtualUser")
+local LP = Players.LocalPlayer
+
+
+local Window   = Rayfield:CreateWindow({
+    Name="VD & FIKO",
+    LoadingTitle="FIKO HUB",
+    LoadingSubtitle="By FIKO",
+    ConfigurationSaving={Enabled=true,FolderName="FIKO HUB",FileName="FIKO"},
+    KeySystem=false
+
+  Rayfield:LoadConfiguration()
