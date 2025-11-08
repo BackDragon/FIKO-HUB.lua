@@ -50,7 +50,6 @@ local TabPlayer = Window:CreateTab("ปรับค่าต่างๆ")
 local TabTP = Window:CreateTab("TP")
 local TabDiscord = Window:CreateTab("Discord")
 
-
 -------------------------------------------------
 -- 🔗 Discord
 -------------------------------------------------
@@ -232,7 +231,7 @@ local function GetPlayerList()
 	return names
 end
 
-local PlayerDropd= TabTP:CreateDropdown({
+local PlayerDropdown = TabTP:CreateDropdown({
 	Name = "เลือกผู้เล่น",
 	Options = GetPlayerList(),
 	CurrentOption = {},
@@ -322,16 +321,13 @@ Players.PlayerRemoving:Connect(function()
 	PlayerDropdown:Refresh(GetPlayerList(), true)
 end)
 
--- 🧭 ต้องมีแท็บก่อน
--- local TabMunu = Window:CreateTab("แมพลอยแพ")
-
+-------------------------------------------------
+-- 📦 Auto เก็บกล่อง
+-------------------------------------------------
 local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local autoCollect = false
 
--------------------------------------------------
--- 📦 ฟังก์ชันเก็บกล่อง
--------------------------------------------------
 local function collectBoxes()
     local world = workspace:FindFirstChild("World")
     if not world or not world:FindFirstChild("Items") then return end
@@ -359,9 +355,6 @@ local function collectBoxes()
     end
 end
 
--------------------------------------------------
--- 🔁 Auto เก็บกล่อง
--------------------------------------------------
 TabMenu:CreateToggle({
     Name = "🔁 Auto เก็บกล่อง + วาร์ปกลับ Spawn",
     CurrentValue = false,
@@ -399,7 +392,7 @@ TabMenu:CreateButton({
         local character = player.Character or player.CharacterAdded:Wait()
         local root = character:FindFirstChild("HumanoidRootPart")
 
-        if workspace:FindFirstChild("SpawnLocation") anฃd root then
+        if workspace:FindFirstChild("SpawnLocation") and root then
             root.CFrame = workspace.SpawnLocation.CFrame + Vector3.new(0, 3, 0)
             Rayfield:Notify({
                 Title = "✅ วาร์ปสำเร็จ!",
