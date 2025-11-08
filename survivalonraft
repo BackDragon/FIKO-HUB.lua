@@ -52,4 +52,55 @@ TabDiscord:CreateButton({
     end,
 })
 
+local SpeedSlider = Tab:CreateSlider({
+Name = "ปรับความเร็ว",
+Range = {16, 700},
+Increment = 1,
+Suffix = "Speed",
+CurrentValue = 16,
+Callback = function(Value)
+local humanoid = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+if humanoid then
+humanoid.WalkSpeed = Value
+end
+end
+})
+
+-- 🦘 ปรับความสูงการกระโดด
+local JumpSlider = Tab:CreateSlider({
+Name = "ปรับความสูงการกระโดด",
+Range = {50, 500},
+Increment = 10,
+Suffix = "Power",
+CurrentValue = 50,
+Callback = function(Value)
+local humanoid = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+if humanoid then
+humanoid.UseJumpPower = true
+humanoid.JumpPower = Value
+end
+end
+})
+
+-- 🔄 ปุ่มรีเซ็ตค่า
+Tab:CreateButton({
+Name = "รีเซ็ตค่าทั้งหมด",
+Callback = function()
+local humanoid = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Humanoid")
+if humanoid then
+humanoid.WalkSpeed = 16
+humanoid.JumpPower = 50
+end
+
+-- รีเซ็ตค่าบน UI กลับไปเหมือนตอนเริ่ม  
+  SpeedSlider:Set(16)  
+  JumpSlider:Set(50)  
+
+  Rayfield:Notify({  
+     Title = "รีเซ็ตสำเร็จ!",  
+     Content = "กลับไปค่าปกติแล้ว",  
+     Duration = 3,  
+     Image = 4483362458, -- ไอคอนเล็ก ๆ (เลือกเปลี่ยนได้)  
+  })
+
 Rayfield:LoadConfiguration()
