@@ -47,6 +47,7 @@ local Window = Rayfield:CreateWindow({
 -------------------------------------------------
 local TabPlayer = Window:CreateTab("ผู้เล่น")
 local TabTP = Window:CreateTab("TP")
+local TabMenu = Window:CreateTab("เมนูหลัก")
 local TabDiscord = Window:CreateTab("Discord")
 
 
@@ -320,6 +321,100 @@ Players.PlayerRemoving:Connect(function()
 	task.wait(1)
 	PlayerDropdown:Refresh(GetPlayerList(), true)
 end)
+
+-- 🧭 ต้องมีแท็บก่อน
+-- local TabMunu = Window:CreateTab("แมพลอยแพ")
+
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local autoCollect = false
+
+-------------------------------------------------
+-- 📦 ฟังก์ชันเก็บกล่อง
+-------------------------------------------------
+local function collectBoxes()
+    local world = workspace:FindFirstChild("World")
+    if not world or not world:FindFirstChild("Items") then return end
+
+    local boxes = world.Items:GetChildren()
+    local foundBox = false
+
+    for _, box in pairs(boxes) do
+        local prompt = box:FindFirstChildOfClass("ProximityPrompt")
+        if prompt then
+            foundBox = true
+            character:MoveTo(box.Position)
+            task.wait(0.3)
+            pcall(function()
+                fireproximityprompt(prompt)
+            end)
+            task.wait(0.3)
+        end
+    end
+
+    -- ถ้าไม่มีกล่อง → วาร์ปกลับ Spawn
+    if not foundBox and workspace:FindFirstChild("SpawnLocation") then
+        local spawnPos = workspace.SpawnLocation.Position
+        character:MoveTo(spawnPos)
+    end
+end
+
+-------------------------------------------------
+-- 🔁 Auto เก็บกล่อง
+-------------------------------------------------
+TabMenu:CreateToggle({
+    Name = "🔁 Auto เก็บกล่อง + วาร์ปกลับ Spawn",
+    CurrentValue = false,
+    Callback = function(Value)
+        autoCollect = Value
+
+        if autoCollect then
+            Rayfield:Notify({
+                Title = "Auto Collect",
+                Content = "เริ่มทำงานแล้ว!",
+                Duration = 2
+            })
+            task.spawn(function()
+                while autoCollect do
+                    collectBoxes()
+                    task.wait(2)
+                end
+            end)
+        else
+            Rayfield:Notify({
+                Title = "Auto Collect",
+                Content = "หยุดทำงานแล้ว!",
+                Duration = 2
+            })
+        end
+    end
+})
+
+-------------------------------------------------
+-- 🏠 ปุ่มวาร์ปกลับ Spawn (แยกต่างหาก)
+-------------------------------------------------
+TabMenu:CreateButton({
+    Name = "🏠 วาร์ปกลับจุดเกิด",
+    Callback = function()
+        local character = player.Character or player.CharacterAdded:Wait()
+        local root = character:FindFirstChild("HumanoidRootPart")
+
+        if workspace:FindFirstChild("SpawnLocation") and root then
+            root.CFrame = workspace.SpawnLocation.CFrame + Vector3.new(0, 3, 0)
+            Rayfield:Notify({
+                Title = "✅ วาร์ปสำเร็จ!",
+                Content = "คุณกลับมายังจุดเริ่มต้นแล้ว",
+                Duration = 3
+            })
+        else
+            Rayfield:Notify({
+                Title = "⚠️ ไม่พบ SpawnLocation",
+                Content = "ไม่พบจุดเกิดในแมปนี้",
+                Duration = 3
+            })
+        end
+    end
+})
 
 -------------------------------------------------
 -- 📦 โหลดการตั้งค่า
