@@ -110,6 +110,41 @@ local JumpSlider = TabPlayer:CreateSlider({
 	end
 })
 
+TabPlayer:CreateSection("เดินทะลุ")
+
+local noclipEnabled = false
+local runService = game:GetService("RunService")
+local player = game.Players.LocalPlayer
+
+-- ฟังก์ชันเปิด/ปิดเดินทะลุ
+local function toggleNoclip()
+	noclipEnabled = not noclipEnabled
+	if noclipEnabled then
+		Rayfield:Notify({
+			Title = "Noclip เปิดทำงานแล้ว ✅",
+			Content = "สามารถเดินทะลุสิ่งกีดขวางได้",
+			Duration = 3
+		})
+	else
+		Rayfield:Notify({
+			Title = "Noclip ปิดการทำงานแล้ว ❌",
+			Content = "กลับมาเดินชนปกติ",
+			Duration = 3
+		})
+	end
+end
+
+-- ทำงานทุกเฟรมเมื่อเปิดใช้งาน
+runService.Stepped:Connect(function()
+	if noclipEnabled then
+		for _, part in pairs(player.Character:GetChildren()) do
+			if part:IsA("BasePart") then
+				part.CanCollide = false
+			end
+		end
+	end
+end)
+
 -- 🔄 ปุ่มรีเซ็ตค่า
 TabPlayer:CreateButton({
 	Name = "รีเซ็ตค่าทั้งหมด",
