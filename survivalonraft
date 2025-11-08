@@ -48,6 +48,7 @@ local Window = Rayfield:CreateWindow({
 -------------------------------------------------
 local TabPlayer = Window:CreateTab("ผู้เล่น")
 local TabDiscord = Window:CreateTab("Discord")
+local TabTP = Window:CreateTab("TP")
 
 -------------------------------------------------
 -- 🔗 Discord
@@ -220,7 +221,146 @@ Callback = function()
 loadstring("\108\111\97\100\115\116\114\105\110\103\40\103\97\109\101\58\72\116\116\112\71\101\116\40\40\39\104\116\116\112\115\58\47\47\103\105\115\116\46\103\105\116\104\117\98\117\115\101\114\99\111\110\116\101\110\116\46\99\111\109\47\109\101\111\122\111\110\101\89\84\47\98\102\48\51\55\100\102\102\57\102\48\97\55\48\48\49\55\51\48\52\100\100\100\54\55\102\100\99\100\51\55\48\47\114\97\119\47\101\49\52\101\55\52\102\52\50\53\98\48\54\48\100\102\53\50\51\51\52\51\99\102\51\48\98\55\56\55\48\55\52\101\98\51\99\53\100\50\47\97\114\99\101\117\115\37\50\53\50\48\120\37\50\53\50\48\102\108\121\37\50\53\50\48\50\37\50\53\50\48\111\98\102\108\117\99\97\116\111\114\39\41\44\116\114\117\101\41\41\40\41\10\10")()
 end
 })
--------------------------------------------------
+
+-----------------------------------------------------
+-- 🧭 แท็บเทเลพอร์ต / มองผู้เล่น
+-----------------------------------------------------
+local TabTP = Window:CreateTab("เทเลพอร์ต")
+TabTP:CreateSection("วาร์ป")
+
+local player = game.Players.LocalPlayer
+local camera = workspace.CurrentCamera
+local targetPlayer = nil
+local spectating = false
+
+-----------------------------------------------------
+-- 🧾 ดึงรายชื่อผู้เล่น (ไม่รวมตัวเอง)
+-----------------------------------------------------
+local function GetPlayerList()
+	local names = {}
+	for _, plr in pairs(game.Players:GetPlayers()) do
+		if plr ~= player then
+			table.insert(names, plr.Name)
+		end
+	end
+	return names
+end
+
+-----------------------------------------------------
+-- 🪄 Dropdown รายชื่อผู้เล่น
+-----------------------------------------------------
+local PlayerDropdown = TabTP:CreateDropdown({
+	Name = "เลือกผู้เล่น",
+	Options = GetPlayerList(),
+	CurrentOption = {},
+	MultipleOptions = false,
+	Flag = "PlayerTeleportDropdown",
+	Callback = function(Option)
+		local selectedName = Option[1]
+		targetPlayer = game.Players:FindFirstChild(selectedName)
+	end
+})
+
+-----------------------------------------------------
+-- ⚡ ปุ่มวาร์ปไปหาผู้เล่น
+-----------------------------------------------------
+TabTP:CreateButton({
+	Name = "⚡ วาร์ปไปหาผู้เล่น",
+	Callback = function()
+		local myChar = player.Character or player.CharacterAdded:Wait()
+		local myRoot = myChar:FindFirstChild("HumanoidRootPart")
+
+		if not targetPlayer then
+			Rayfield:Notify({
+				Title = "⚠️ ยังไม่ได้เลือกผู้เล่น",
+				Content = "กรุณาเลือกชื่อจากรายการก่อน",
+				Duration = 2
+			})
+			return
+		end
+
+		local targetChar = targetPlayer.Character or targetPlayer.CharacterAdded:Wait()
+		local targetRoot = targetChar:FindFirstChild("HumanoidRootPart")
+			or targetChar:FindFirstChild("LowerTorso")
+			or targetChar:FindFirstChild("Torso")
+
+		if myRoot and targetRoot then
+			myRoot.CFrame = targetRoot.CFrame + Vector3.new(0, 3, 0)
+			Rayfield:Notify({
+				Title = "✅ วาร์ปสำเร็จ!",
+				Content = "คุณถูกวาร์ปไปหา " .. targetPlayer.Name,
+				Duration = 2
+			})
+		else
+			Rayfield:Notify({
+				Title = "❌ วาร์ปล้มเหลว",
+				Content = "ไม่พบตำแหน่งของผู้เล่นเป้าหมาย",
+				Duration = 3
+			})
+		end
+	end
+})
+
+-----------------------------------------------------
+-- 🎥 ปุ่มเปิด/ปิดโหมดมองผู้เล่น (Spectate)
+-----------------------------------------------------
+TabTP:CreateButton({
+	Name = "👁️ เปิด / ปิดโหมดมองผู้เล่น",
+	Callback = function()
+		if not targetPlayer then
+			Rayfield:Notify({
+				Title = "⚠️ ยังไม่ได้เลือกผู้เล่น",
+				Content = "กรุณาเลือกชื่อจาก Dropdown ก่อน",
+				Duration = 2
+			})
+			return
+		end
+
+		spectating = not spectating
+
+		if spectating then
+			camera.CameraSubject = targetPlayer.Character:WaitForChild("Humanoid")
+			camera.CameraType = Enum.CameraType.Custom
+
+			Rayfield:Notify({
+				Title = "🎥 เริ่มมองผู้เล่น",
+				Content = "กำลังมอง: " .. targetPlayer.Name,
+				Duration = 2
+			})
+
+			targetPlayer.CharacterAdded:Connect(function(newChar)
+				task.wait(1)
+				if spectating then
+					camera.CameraSubject = newChar:WaitForChild("Humanoid")
+				end
+			end)
+		else
+			camera.CameraSubject = player.Character:WaitForChild("Humanoid")
+			camera.CameraType = Enum.CameraType.Custom
+
+			Rayfield:Notify({
+				Title = "👁️ หยุดมองผู้เล่น",
+				Content = "กลับมามองตัวเองแล้ว",
+				Duration = 2
+			})
+		end
+	end
+})
+
+-----------------------------------------------------
+-- 🔁 อัปเดตรายชื่อเมื่อมีผู้เล่นเข้า/ออก
+-----------------------------------------------------
+game.Players.PlayerAdded:Connect(function()
+	task.wait(1)
+	PlayerDropdown:Refresh(GetPlayerList(), true)
+end)
+
+game.Players.PlayerRemoving:Connect(function()
+	task.wait(1)
+	PlayerDropdown:Refresh(GetPlayerList(), true)
+end)
+
+---------------------------------------------
 -- 📦 โหลดการตั้งค่า
 -------------------------------------------------
 Rayfield:LoadConfiguration()
