@@ -28,9 +28,28 @@ KeySystem = false
 
 local TabPlayer= Window:CreateTab("ผู้เล่น")
 local TabESP   = Window:CreateTab("ESP")
-local TabWorld = Window:CreateTab("มองของในแมพ")
-local TabVisual= Window:CreateTab("ปรับแสง")
-local TabMisc  = Window:CreateTab("ตั้งค่าช่วยเล่น")
 local TabDiscord=Window:CreateTab("Discord")
+
+TabDiscord:CreateSection("กดเพื่อเอาลิ้งดิส")
+TabDiscord:CreateButton({
+    Name = "📋 Copy Discord Link",
+    Callback = function()
+        local link = "https://discord.gg/U8qEGaNe6E"
+        if setclipboard then
+            setclipboard(link)
+            game.StarterGui:SetCore("SendNotification", {
+                Title = "✅ ลิงก์ถูกคัดลอกแล้ว!",
+                Text = link,
+                Duration = 5
+            })
+        else
+            game.StarterGui:SetCore("SendNotification", {
+                Title = "⚠️ ไม่สามารถคัดลอกได้",
+                Text = "Executor ของคุณไม่รองรับ setclipboard",
+                Duration = 5
+            })
+        end
+    end,
+})
 
 Rayfield:LoadConfiguration()
