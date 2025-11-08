@@ -47,8 +47,8 @@ local Window = Rayfield:CreateWindow({
 -- 📁 แท็บต่าง ๆ
 -------------------------------------------------
 local TabPlayer = Window:CreateTab("ผู้เล่น")
-local TabDiscord = Window:CreateTab("Discord")
 local TabTP = Window:CreateTab("TP")
+local TabDiscord = Window:CreateTab("Discord")
 
 -------------------------------------------------
 -- 🔗 Discord
@@ -120,32 +120,24 @@ TabPlayer:CreateButton({
 			humanoid.WalkSpeed = 16
 			humanoid.JumpPower = 50
 		end
-
-		-- รีเซ็ตค่าบน UI กลับไปเหมือนตอนเริ่ม  
 		SpeedSlider:Set(16)
 		JumpSlider:Set(50)
-
 		Rayfield:Notify({
 			Title = "รีเซ็ตสำเร็จ!",
 			Content = "กลับไปค่าปกติแล้ว ✅",
 			Duration = 3,
-			Image = 4483362458 -- ไอคอนเล็ก ๆ (เปลี่ยนได้)
+			Image = 4483362458
 		})
 	end
 })
 
-TabPlayer:CreateSection("เดินทะลุ")
-
-local noclipEnabled = false
-local runService = game:GetService("RunService")
-local player = game.Players.LocalPlayer
-
 -------------------------------------------------
 -- 🧱 เดินทะลุ (Noclip)
 -------------------------------------------------
+TabPlayer:CreateSection("เดินทะลุ")
+
 local noclipEnabled = false
 
--- ปุ่มเปิด/ปิดเดินทะลุ
 TabPlayer:CreateButton({
 	Name = "เปิด / ปิด เดินทะลุ",
 	Callback = function()
@@ -166,7 +158,6 @@ TabPlayer:CreateButton({
 	end
 })
 
--- ทำงานทุกเฟรมเมื่อเปิดใช้งาน
 RunService.Stepped:Connect(function()
 	if noclipEnabled and LP.Character then
 		for _, part in pairs(LP.Character:GetChildren()) do
@@ -177,11 +168,12 @@ RunService.Stepped:Connect(function()
 	end
 end)
 
- TabPlayer:CreateSection("แสงสว่าง")
+-------------------------------------------------
+-- 💡 โหมดแสงสว่าง (FullBright)
+-------------------------------------------------
+TabPlayer:CreateSection("แสงสว่าง")
 
 local FullBrightEnabled = false
-local RunService = game:GetService("RunService")
-local lighting = game:GetService("Lighting")
 local connection
 
 TabPlayer:CreateButton({
@@ -191,11 +183,11 @@ TabPlayer:CreateButton({
 
 		if FullBrightEnabled then
 			connection = RunService.RenderStepped:Connect(function()
-				lighting.Brightness = 2
-				lighting.ClockTime = 14
-				lighting.FogEnd = 1e10
-				lighting.GlobalShadows = false
-				lighting.OutdoorAmbient = Color3.new(1, 1, 1)
+				Lighting.Brightness = 2
+				Lighting.ClockTime = 14
+				Lighting.FogEnd = 1e10
+				Lighting.GlobalShadows = false
+				Lighting.OutdoorAmbient = Color3.new(1, 1, 1)
 			end)
 			Rayfield:Notify({
 				Title = "เปิด FullBright ☀️",
@@ -204,7 +196,7 @@ TabPlayer:CreateButton({
 			})
 		else
 			if connection then connection:Disconnect() end
-			lighting.GlobalShadows = true
+			Lighting.GlobalShadows = true
 			Rayfield:Notify({
 				Title = "ปิด FullBright 🌑",
 				Content = "กลับสู่สภาพปกติ",
@@ -214,31 +206,30 @@ TabPlayer:CreateButton({
 	end
 })
 
-TabPlayer:CreateSection("ฟังชั่นบิน")
+-------------------------------------------------
+-- ✈️ ฟังก์ชันบิน
+-------------------------------------------------
+TabPlayer:CreateSection("ฟังก์ชันบิน")
 TabPlayer:CreateButton({
-Name = "กดเพื่อเปิดสคริปต์บิน",
-Callback = function()
-loadstring("\108\111\97\100\115\116\114\105\110\103\40\103\97\109\101\58\72\116\116\112\71\101\116\40\40\39\104\116\116\112\115\58\47\47\103\105\115\116\46\103\105\116\104\117\98\117\115\101\114\99\111\110\116\101\110\116\46\99\111\109\47\109\101\111\122\111\110\101\89\84\47\98\102\48\51\55\100\102\102\57\102\48\97\55\48\48\49\55\51\48\52\100\100\100\54\55\102\100\99\100\51\55\48\47\114\97\119\47\101\49\52\101\55\52\102\52\50\53\98\48\54\48\100\102\53\50\51\51\52\51\99\102\51\48\98\55\56\55\48\55\52\101\98\51\99\53\100\50\47\97\114\99\101\117\115\37\50\53\50\48\120\37\50\53\50\48\102\108\121\37\50\53\50\48\50\37\50\53\50\48\111\98\102\108\117\99\97\116\111\114\39\41\44\116\114\117\101\41\41\40\41\10\10")()
-end
+	Name = "กดเพื่อเปิดสคริปต์บิน",
+    Callback = function()
+		loadstring(game:HttpGet("https://gist.githubusercontent.com/meozoneYT/bf037dff9f0a70017304ddd67fdcd370/raw/e14e74f425b060df523343cf30b787074eb3c5d2/Arceus%20X%20Fly%202%20OBFLUCATOR"))()
+	end
 })
 
------------------------------------------------------
--- 🧭 แท็บเทเลพอร์ต / มองผู้เล่น
------------------------------------------------------
-local TabTP = Window:CreateTab("TP")
+-------------------------------------------------
+-- 🧭 ระบบวาร์ป (Teleport + Spectate)
+-------------------------------------------------
 TabTP:CreateSection("วาร์ป")
 
-local player = game.Players.LocalPlayer
-local camera = workspace.CurrentCamera
+local player = Players.LocalPlayer
+local camera = Workspace.CurrentCamera
 local targetPlayer = nil
 local spectating = false
 
------------------------------------------------------
--- 🧾 ดึงรายชื่อผู้เล่น (ไม่รวมตัวเอง)
------------------------------------------------------
 local function GetPlayerList()
 	local names = {}
-	for _, plr in pairs(game.Players:GetPlayers()) do
+	for _, plr in pairs(Players:GetPlayers()) do
 		if plr ~= player then
 			table.insert(names, plr.Name)
 		end
@@ -246,9 +237,6 @@ local function GetPlayerList()
 	return names
 end
 
------------------------------------------------------
--- 🪄 Dropdown รายชื่อผู้เล่น
------------------------------------------------------
 local PlayerDropdown = TabTP:CreateDropdown({
 	Name = "เลือกผู้เล่น",
 	Options = GetPlayerList(),
@@ -257,13 +245,10 @@ local PlayerDropdown = TabTP:CreateDropdown({
 	Flag = "PlayerTeleportDropdown",
 	Callback = function(Option)
 		local selectedName = Option[1]
-		targetPlayer = game.Players:FindFirstChild(selectedName)
+		targetPlayer = Players:FindFirstChild(selectedName)
 	end
 })
 
------------------------------------------------------
--- ⚡ ปุ่มวาร์ปไปหาผู้เล่น
------------------------------------------------------
 TabTP:CreateButton({
 	Name = "⚡ วาร์ปไปหาผู้เล่น",
 	Callback = function()
@@ -271,12 +256,11 @@ TabTP:CreateButton({
 		local myRoot = myChar:FindFirstChild("HumanoidRootPart")
 
 		if not targetPlayer then
-			Rayfield:Notify({
+			return Rayfield:Notify({
 				Title = "⚠️ ยังไม่ได้เลือกผู้เล่น",
 				Content = "กรุณาเลือกชื่อจากรายการก่อน",
 				Duration = 2
 			})
-			return
 		end
 
 		local targetChar = targetPlayer.Character or targetPlayer.CharacterAdded:Wait()
@@ -301,27 +285,21 @@ TabTP:CreateButton({
 	end
 })
 
------------------------------------------------------
--- 🎥 ปุ่มเปิด/ปิดโหมดมองผู้เล่น (Spectate)
------------------------------------------------------
 TabTP:CreateButton({
 	Name = "👁️ เปิด / ปิดโหมดมองผู้เล่น",
 	Callback = function()
 		if not targetPlayer then
-			Rayfield:Notify({
+			return Rayfield:Notify({
 				Title = "⚠️ ยังไม่ได้เลือกผู้เล่น",
 				Content = "กรุณาเลือกชื่อจาก Dropdown ก่อน",
 				Duration = 2
 			})
-			return
 		end
 
 		spectating = not spectating
 
 		if spectating then
 			camera.CameraSubject = targetPlayer.Character:WaitForChild("Humanoid")
-			camera.CameraType = Enum.CameraType.Custom
-
 			Rayfield:Notify({
 				Title = "🎥 เริ่มมองผู้เล่น",
 				Content = "กำลังมอง: " .. targetPlayer.Name,
@@ -336,8 +314,6 @@ TabTP:CreateButton({
 			end)
 		else
 			camera.CameraSubject = player.Character:WaitForChild("Humanoid")
-			camera.CameraType = Enum.CameraType.Custom
-
 			Rayfield:Notify({
 				Title = "👁️ หยุดมองผู้เล่น",
 				Content = "กลับมามองตัวเองแล้ว",
@@ -347,20 +323,16 @@ TabTP:CreateButton({
 	end
 })
 
------------------------------------------------------
--- 🔁 อัปเดตรายชื่อเมื่อมีผู้เล่นเข้า/ออก
------------------------------------------------------
-game.Players.PlayerAdded:Connect(function()
+Players.PlayerAdded:Connect(function()
+	task.wait(1)
+	PlayerDropdown:Refresh(GetPlayerList(), true)
+end)
+Players.PlayerRemoving:Connect(function()
 	task.wait(1)
 	PlayerDropdown:Refresh(GetPlayerList(), true)
 end)
 
-game.Players.PlayerRemoving:Connect(function()
-	task.wait(1)
-	PlayerDropdown:Refresh(GetPlayerList(), true)
-end)
-
----------------------------------------------
+-------------------------------------------------
 -- 📦 โหลดการตั้งค่า
 -------------------------------------------------
 Rayfield:LoadConfiguration()
