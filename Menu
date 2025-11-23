@@ -50,6 +50,114 @@ local TabESP = Window:CreateTab("ESP")
 local TabTP = Window:CreateTab("TP")
 
 
+
+-------------------------------------------------
+-- 🕶️ ESP
+-------------------------------------------------
+TabESP:CreateSection("ESP ผู้เล่น")
+
+local ESPEnabled = false
+local NameTagEnabled = false
+local ESPColor = Color3.fromRGB(255, 60, 60)
+local ESPObjects = {}
+
+-- ฟังก์ชันสร้าง ESP ให้ผู้เล่น
+local function CreateESP(player)
+	if ESPObjects[player] then return end
+	if not player.Character then return end
+
+	-- Highlight
+	local highlight = Instance.new("Highlight")
+	highlight.Name = "FIKOESP"
+	highlight.Adornee = player.Character
+	highlight.FillColor = ESPColor
+	highlight.OutlineColor = Color3.new(0,0,0)
+	highlight.FillTransparency = 0.5
+	highlight.OutlineTransparency = 0.25
+	highlight.Parent = workspace
+
+	-- NameTag
+	local head = player.Character:FindFirstChild("Head")
+	local billboard
+	if head then
+		billboard = Instance.new("BillboardGui")
+		billboard.Name = "FIKONametag"
+		billboard.Adornee = head
+		billboard.Size = UDim2.new(0, 100, 0, 25)
+		billboard.StudsOffset = Vector3.new(0, 2, 0)
+		billboard.AlwaysOnTop = true
+
+		local textLabel = Instance.new("TextLabel")
+		textLabel.Size = UDim2.new(1,0,1,0)
+		textLabel.BackgroundTransparency = 1
+		textLabel.TextColor3 = ESPColor
+		textLabel.TextStrokeColor3 = Color3.new(0,0,0)
+		textLabel.TextStrokeTransparency = 0
+		textLabel.TextScaled = true
+		textLabel.Font = Enum.Font.SourceSansBold
+		textLabel.Text = player.Name
+		textLabel.Parent = billboard
+
+		billboard.Parent = player.Character
+	end
+
+	ESPObjects[player] = {Highlight = highlight, NameTag = billboard}
+end
+
+-- ฟังก์ชันลบ ESP
+local function RemoveESP(player)
+	if ESPObjects[player] then
+		if ESPObjects[player].Highlight then ESPObjects[player].Highlight:Destroy() end
+		if ESPObjects[player].NameTag then ESPObjects[player].NameTag:Destroy() end
+		ESPObjects[player] = nil
+	end
+end
+
+-- ปุ่มเปิด/ปิด ESP
+TabESP:CreateButton({
+	Name = "เปิด/ปิด ESP",
+	Callback = function()
+		ESPEnabled = not ESPEnabled
+		for _, plr in pairs(Players:GetPlayers()) do
+			if plr ~= LP then
+				if ESPEnabled then
+					CreateESP(plr)
+				else
+					RemoveESP(plr)
+				end
+			end
+		end
+	end
+})
+
+-- ปุ่มเปิด/ปิด NameTag
+TabESP:CreateButton({
+	Name = "เปิด/ปิด NameTag",
+	Callback = function()
+		NameTagEnabled = not NameTagEnabled
+		for _, plr in pairs(Players:GetPlayers()) do
+			if ESPObjects[plr] and ESPObjects[plr].NameTag then
+				ESPObjects[plr].NameTag.Enabled = NameTagEnabled
+			end
+		end
+	end
+})
+
+-- อัปเดตผู้เล่นใหม่เข้าเกม
+Players.PlayerAdded:Connect(function(plr)
+	task.wait(1)
+	if ESPEnabled and plr ~= LP then
+		CreateESP(plr)
+	end
+end)
+
+-- ลบผู้เล่นออก
+Players.PlayerRemoving:Connect(function(plr)
+	RemoveESP(plr)
+end)
+
+
+
 -------------------------------------------------
 -- ⚙️ ตั้งค่าความเร็ว + กระโดด
 -------------------------------------------------
