@@ -85,7 +85,7 @@ local function RemoveESP(player)
 	end
 end
 
--- ฟังก์ชันสร้าง NameTag (ขนาดเล็ก)
+-- ฟังก์ชันสร้าง NameTag
 local function CreateNameTag(player)
 	if ESPObjects[player] and ESPObjects[player].NameTag then return end
 	if not player.Character then return end
@@ -96,7 +96,7 @@ local function CreateNameTag(player)
 	local billboard = Instance.new("BillboardGui")
 	billboard.Name = "FIKONametag"
 	billboard.Adornee = head
-	billboard.Size = UDim2.new(0, 60, 0, 15) -- ลดขนาดลง
+	billboard.Size = UDim2.new(0, 60, 0, 15) -- เล็กลง
 	billboard.StudsOffset = Vector3.new(0, 2, 0)
 	billboard.AlwaysOnTop = true
 
@@ -157,25 +157,6 @@ TabESP:CreateButton({
 	end
 })
 
--- Slider ปรับสี ESP / NameTag
-TabESP:CreateColorPicker({
-	Name = "ปรับสี ESP / NameTag",
-	CurrentColor = ESPColor,
-	Callback = function(color)
-		ESPColor = color
-		for _, plr in pairs(Players:GetPlayers()) do
-			if ESPObjects[plr] then
-				if ESPObjects[plr].Highlight then
-					ESPObjects[plr].Highlight.FillColor = ESPColor
-				end
-				if ESPObjects[plr].NameTag then
-					ESPObjects[plr].NameTag.TextLabel.TextColor3 = ESPColor
-				end
-			end
-		end
-	end
-})
-
 -- อัปเดตผู้เล่นใหม่เข้าเกม
 Players.PlayerAdded:Connect(function(plr)
 	task.wait(1)
@@ -192,7 +173,6 @@ Players.PlayerRemoving:Connect(function(plr)
 	RemoveESP(plr)
 	RemoveNameTag(plr)
 end)
-
 
 
 
