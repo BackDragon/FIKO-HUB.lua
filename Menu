@@ -49,8 +49,6 @@ local TabPlayer = Window:CreateTab("ผู้เล่น")
 local TabESP = Window:CreateTab("ESP")
 local TabTP = Window:CreateTab("TP")
 
-
-
 -------------------------------------------------
 -- 🕶️ ESP
 -------------------------------------------------
@@ -61,12 +59,11 @@ local NameTagEnabled = false
 local ESPColor = Color3.fromRGB(255, 60, 60)
 local ESPObjects = {}
 
--- ฟังก์ชันสร้าง ESP ให้ผู้เล่น
+-- ฟังก์ชันสร้าง Highlight
 local function CreateESP(player)
-	if ESPObjects[player] then return end
+	if ESPObjects[player] and ESPObjects[player].Highlight then return end
 	if not player.Character then return end
 
-	-- Highlight
 	local highlight = Instance.new("Highlight")
 	highlight.Name = "FIKOESP"
 	highlight.Adornee = player.Character
@@ -76,40 +73,55 @@ local function CreateESP(player)
 	highlight.OutlineTransparency = 0.25
 	highlight.Parent = workspace
 
-	-- NameTag
-	local head = player.Character:FindFirstChild("Head")
-	local billboard
-	if head then
-		billboard = Instance.new("BillboardGui")
-		billboard.Name = "FIKONametag"
-		billboard.Adornee = head
-		billboard.Size = UDim2.new(0, 100, 0, 25)
-		billboard.StudsOffset = Vector3.new(0, 2, 0)
-		billboard.AlwaysOnTop = true
-
-		local textLabel = Instance.new("TextLabel")
-		textLabel.Size = UDim2.new(1,0,1,0)
-		textLabel.BackgroundTransparency = 1
-		textLabel.TextColor3 = ESPColor
-		textLabel.TextStrokeColor3 = Color3.new(0,0,0)
-		textLabel.TextStrokeTransparency = 0
-		textLabel.TextScaled = true
-		textLabel.Font = Enum.Font.SourceSansBold
-		textLabel.Text = player.Name
-		textLabel.Parent = billboard
-
-		billboard.Parent = player.Character
-	end
-
-	ESPObjects[player] = {Highlight = highlight, NameTag = billboard}
+	ESPObjects[player] = ESPObjects[player] or {}
+	ESPObjects[player].Highlight = highlight
 end
 
--- ฟังก์ชันลบ ESP
+-- ฟังก์ชันลบ Highlight
 local function RemoveESP(player)
-	if ESPObjects[player] then
-		if ESPObjects[player].Highlight then ESPObjects[player].Highlight:Destroy() end
-		if ESPObjects[player].NameTag then ESPObjects[player].NameTag:Destroy() end
-		ESPObjects[player] = nil
+	if ESPObjects[player] and ESPObjects[player].Highlight then
+		ESPObjects[player].Highlight:Destroy()
+		ESPObjects[player].Highlight = nil
+	end
+end
+
+-- ฟังก์ชันสร้าง NameTag (ขนาดเล็ก)
+local function CreateNameTag(player)
+	if ESPObjects[player] and ESPObjects[player].NameTag then return end
+	if not player.Character then return end
+
+	local head = player.Character:FindFirstChild("Head")
+	if not head then return end
+
+	local billboard = Instance.new("BillboardGui")
+	billboard.Name = "FIKONametag"
+	billboard.Adornee = head
+	billboard.Size = UDim2.new(0, 60, 0, 15) -- ลดขนาดลง
+	billboard.StudsOffset = Vector3.new(0, 2, 0)
+	billboard.AlwaysOnTop = true
+
+	local textLabel = Instance.new("TextLabel")
+	textLabel.Size = UDim2.new(1,0,1,0)
+	textLabel.BackgroundTransparency = 1
+	textLabel.TextColor3 = ESPColor
+	textLabel.TextStrokeColor3 = Color3.new(0,0,0)
+	textLabel.TextStrokeTransparency = 0
+	textLabel.TextScaled = true
+	textLabel.Font = Enum.Font.SourceSansBold
+	textLabel.Text = player.Name
+	textLabel.Parent = billboard
+
+	billboard.Parent = player.Character
+
+	ESPObjects[player] = ESPObjects[player] or {}
+	ESPObjects[player].NameTag = billboard
+end
+
+-- ฟังก์ชันลบ NameTag
+local function RemoveNameTag(player)
+	if ESPObjects[player] and ESPObjects[player].NameTag then
+		ESPObjects[player].NameTag:Destroy()
+		ESPObjects[player].NameTag = nil
 	end
 end
 
@@ -136,8 +148,29 @@ TabESP:CreateButton({
 	Callback = function()
 		NameTagEnabled = not NameTagEnabled
 		for _, plr in pairs(Players:GetPlayers()) do
-			if ESPObjects[plr] and ESPObjects[plr].NameTag then
-				ESPObjects[plr].NameTag.Enabled = NameTagEnabled
+			if NameTagEnabled then
+				CreateNameTag(plr)
+			else
+				RemoveNameTag(plr)
+			end
+		end
+	end
+})
+
+-- Slider ปรับสี ESP / NameTag
+TabESP:CreateColorPicker({
+	Name = "ปรับสี ESP / NameTag",
+	CurrentColor = ESPColor,
+	Callback = function(color)
+		ESPColor = color
+		for _, plr in pairs(Players:GetPlayers()) do
+			if ESPObjects[plr] then
+				if ESPObjects[plr].Highlight then
+					ESPObjects[plr].Highlight.FillColor = ESPColor
+				end
+				if ESPObjects[plr].NameTag then
+					ESPObjects[plr].NameTag.TextLabel.TextColor3 = ESPColor
+				end
 			end
 		end
 	end
@@ -149,12 +182,17 @@ Players.PlayerAdded:Connect(function(plr)
 	if ESPEnabled and plr ~= LP then
 		CreateESP(plr)
 	end
+	if NameTagEnabled and plr ~= LP then
+		CreateNameTag(plr)
+	end
 end)
 
 -- ลบผู้เล่นออก
 Players.PlayerRemoving:Connect(function(plr)
 	RemoveESP(plr)
+	RemoveNameTag(plr)
 end)
+
 
 
 
