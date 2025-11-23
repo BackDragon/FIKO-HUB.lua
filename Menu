@@ -1,131 +1,98 @@
--- 🧠 ส่วนหัวหลัก (FIKO HUB)
+-- 🧠 FIKO HUB - Full Script
 -------------------------------------------------
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
 local Lighting = game:GetService("Lighting")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local StarterGui = game:GetService("StarterGui")
-local VirtualUser = game:GetService("VirtualUser")
 local LP = Players.LocalPlayer
 
--------------------------------------------------
--- ⚙️ โหลด Rayfield UI
--------------------------------------------------
+-- โหลด Rayfield
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
--------------------------------------------------
--- 🪟 สร้างหน้าต่างหลัก
--------------------------------------------------
+-- สร้างหน้าต่างหลัก
 local Window = Rayfield:CreateWindow({
 	Name = "FIKO HUB",
 	Icon = 0,
 	LoadingTitle = "เมนูหลัก",
 	LoadingSubtitle = "FIKO HUB",
 	Theme = "Default",
-
 	DisableRayfieldPrompts = true,
 	DisableBuildWarnings = true,
-
-	ConfigurationSaving = {
-		Enabled = true,
-		FolderName = "FIKO HUB",
-		FileName = "FIKO HUB"
-	},
-
-	Discord = {
-		Enabled = false,
-		Invite = "https://discord.gg/U8qEGaNe6E",
-		RememberJoins = true
-	},
-
+	ConfigurationSaving = {Enabled = true, FolderName = "FIKO HUB", FileName = "FIKO HUB"},
+	Discord = {Enabled = false},
 	KeySystem = false
 })
 
--------------------------------------------------
--- 📁 แท็บต่าง ๆ
--------------------------------------------------
+-- สร้าง Tab
 local TabPlayer = Window:CreateTab("ผู้เล่น")
-local TabESP = Window:CreateTab("ESP")
 local TabTP = Window:CreateTab("TP")
+local TabESP = Window:CreateTab("ESP")
 
 -------------------------------------------------
 -- 🕶️ ESP
 -------------------------------------------------
 TabESP:CreateSection("ESP ผู้เล่น")
-
 local ESPEnabled = false
 local NameTagEnabled = false
 local ESPColor = Color3.fromRGB(255, 60, 60)
 local ESPObjects = {}
 
--- ฟังก์ชันสร้าง Highlight
-local function CreateESP(player)
-	if ESPObjects[player] and ESPObjects[player].Highlight then return end
-	if not player.Character then return end
-
+local function CreateESP(plr)
+	if ESPObjects[plr] and ESPObjects[plr].Highlight then return end
+	if not plr.Character then return end
 	local highlight = Instance.new("Highlight")
 	highlight.Name = "FIKOESP"
-	highlight.Adornee = player.Character
+	highlight.Adornee = plr.Character
 	highlight.FillColor = ESPColor
 	highlight.OutlineColor = Color3.new(0,0,0)
 	highlight.FillTransparency = 0.5
 	highlight.OutlineTransparency = 0.25
 	highlight.Parent = workspace
-
-	ESPObjects[player] = ESPObjects[player] or {}
-	ESPObjects[player].Highlight = highlight
+	ESPObjects[plr] = ESPObjects[plr] or {}
+	ESPObjects[plr].Highlight = highlight
 end
 
--- ฟังก์ชันลบ Highlight
-local function RemoveESP(player)
-	if ESPObjects[player] and ESPObjects[player].Highlight then
-		ESPObjects[player].Highlight:Destroy()
-		ESPObjects[player].Highlight = nil
+local function RemoveESP(plr)
+	if ESPObjects[plr] and ESPObjects[plr].Highlight then
+		ESPObjects[plr].Highlight:Destroy()
+		ESPObjects[plr].Highlight = nil
 	end
 end
 
--- ฟังก์ชันสร้าง NameTag
-local function CreateNameTag(player)
-	if ESPObjects[player] and ESPObjects[player].NameTag then return end
-	if not player.Character then return end
-
-	local head = player.Character:FindFirstChild("Head")
+local function CreateNameTag(plr)
+	if ESPObjects[plr] and ESPObjects[plr].NameTag then return end
+	if not plr.Character then return end
+	local head = plr.Character:FindFirstChild("Head")
 	if not head then return end
-
 	local billboard = Instance.new("BillboardGui")
 	billboard.Name = "FIKONametag"
 	billboard.Adornee = head
-	billboard.Size = UDim2.new(0, 60, 0, 15) -- เล็กลง
-	billboard.StudsOffset = Vector3.new(0, 2, 0)
+	billboard.Size = UDim2.new(0, 60, 0, 15)
+	billboard.StudsOffset = Vector3.new(0,2,0)
 	billboard.AlwaysOnTop = true
-
-	local textLabel = Instance.new("TextLabel")
-	textLabel.Size = UDim2.new(1,0,1,0)
-	textLabel.BackgroundTransparency = 1
-	textLabel.TextColor3 = ESPColor
-	textLabel.TextStrokeColor3 = Color3.new(0,0,0)
-	textLabel.TextStrokeTransparency = 0
-	textLabel.TextScaled = true
-	textLabel.Font = Enum.Font.SourceSansBold
-	textLabel.Text = player.Name
-	textLabel.Parent = billboard
-
-	billboard.Parent = player.Character
-
-	ESPObjects[player] = ESPObjects[player] or {}
-	ESPObjects[player].NameTag = billboard
+	local label = Instance.new("TextLabel")
+	label.Size = UDim2.new(1,0,1,0)
+	label.BackgroundTransparency = 1
+	label.Text = plr.Name
+	label.TextColor3 = ESPColor
+	label.TextStrokeColor3 = Color3.new(0,0,0)
+	label.TextStrokeTransparency = 0
+	label.TextScaled = true
+	label.Font = Enum.Font.SourceSansBold
+	label.Parent = billboard
+	billboard.Parent = plr.Character
+	ESPObjects[plr] = ESPObjects[plr] or {}
+	ESPObjects[plr].NameTag = billboard
 end
 
--- ฟังก์ชันลบ NameTag
-local function RemoveNameTag(player)
-	if ESPObjects[player] and ESPObjects[player].NameTag then
-		ESPObjects[player].NameTag:Destroy()
-		ESPObjects[player].NameTag = nil
+local function RemoveNameTag(plr)
+	if ESPObjects[plr] and ESPObjects[plr].NameTag then
+		ESPObjects[plr].NameTag:Destroy()
+		ESPObjects[plr].NameTag = nil
 	end
 end
 
--- ปุ่มเปิด/ปิด ESP
 TabESP:CreateButton({
 	Name = "เปิด/ปิด ESP",
 	Callback = function()
@@ -142,290 +109,207 @@ TabESP:CreateButton({
 	end
 })
 
--- ปุ่มเปิด/ปิด NameTag
 TabESP:CreateButton({
 	Name = "เปิด/ปิด NameTag",
 	Callback = function()
 		NameTagEnabled = not NameTagEnabled
 		for _, plr in pairs(Players:GetPlayers()) do
-			if NameTagEnabled then
-				CreateNameTag(plr)
-			else
-				RemoveNameTag(plr)
+			if plr ~= LP then
+				if NameTagEnabled then
+					CreateNameTag(plr)
+				else
+					RemoveNameTag(plr)
+				end
 			end
 		end
 	end
 })
 
--- อัปเดตผู้เล่นใหม่เข้าเกม
 Players.PlayerAdded:Connect(function(plr)
 	task.wait(1)
-	if ESPEnabled and plr ~= LP then
-		CreateESP(plr)
-	end
-	if NameTagEnabled and plr ~= LP then
-		CreateNameTag(plr)
-	end
+	if ESPEnabled then CreateESP(plr) end
+	if NameTagEnabled then CreateNameTag(plr) end
+	plr.CharacterAdded:Connect(function()
+		task.wait(0.5)
+		if ESPEnabled then CreateESP(plr) end
+		if NameTagEnabled then CreateNameTag(plr) end
+	end)
 end)
 
--- ลบผู้เล่นออก
 Players.PlayerRemoving:Connect(function(plr)
 	RemoveESP(plr)
 	RemoveNameTag(plr)
 end)
 
-
-
 -------------------------------------------------
--- ⚙️ ตั้งค่าความเร็ว + กระโดด
+-- 🧩 TabPlayer - ความเร็ว, กระโดด, Noclip, FullBright, Fly
 -------------------------------------------------
 TabPlayer:CreateSection("ตั้งค่าต่างๆ")
-
 local SpeedSlider = TabPlayer:CreateSlider({
 	Name = "ปรับความเร็ว",
-	Range = {16, 700},
+	Range = {16,700},
 	Increment = 1,
 	Suffix = "Speed",
 	CurrentValue = 16,
-	Callback = function(Value)
-		local humanoid = LP.Character and LP.Character:FindFirstChildOfClass("Humanoid")
-		if humanoid then
-			humanoid.WalkSpeed = Value
-		end
+	Callback = function(v)
+		local h = LP.Character and LP.Character:FindFirstChildOfClass("Humanoid")
+		if h then h.WalkSpeed = v end
 	end
 })
-
 local JumpSlider = TabPlayer:CreateSlider({
 	Name = "ปรับความสูงการกระโดด",
-	Range = {50, 500},
+	Range = {50,500},
 	Increment = 10,
 	Suffix = "Power",
 	CurrentValue = 50,
-	Callback = function(Value)
-		local humanoid = LP.Character and LP.Character:FindFirstChildOfClass("Humanoid")
-		if humanoid then
-			humanoid.UseJumpPower = true
-			humanoid.JumpPower = Value
+	Callback = function(v)
+		local h = LP.Character and LP.Character:FindFirstChildOfClass("Humanoid")
+		if h then
+			h.UseJumpPower = true
+			h.JumpPower = v
 		end
 	end
 })
-
 TabPlayer:CreateButton({
 	Name = "รีเซ็ตค่าทั้งหมด",
 	Callback = function()
-		local humanoid = LP.Character and LP.Character:FindFirstChildOfClass("Humanoid")
-		if humanoid then
-			humanoid.WalkSpeed = 16
-			humanoid.JumpPower = 50
-		end
+		local h = LP.Character and LP.Character:FindFirstChildOfClass("Humanoid")
+		if h then h.WalkSpeed = 16 h.JumpPower = 50 end
 		SpeedSlider:Set(16)
 		JumpSlider:Set(50)
-
-		Rayfield:Notify({
-			Title = "รีเซ็ตสำเร็จ!",
-			Content = "กลับไปค่าปกติแล้ว ✅",
-			Duration = 3,
-			Image = 4483362458
-		})
+		Rayfield:Notify({Title="รีเซ็ตสำเร็จ!",Content="กลับไปค่าปกติแล้ว ✅",Duration=3,Image=4483362458})
 	end
 })
 
--------------------------------------------------
--- 🧱 เดินทะลุ (Noclip)
--------------------------------------------------
+-- Noclip
 TabPlayer:CreateSection("เดินทะลุ")
-
-local noclipEnabled = false
-
+local noclip = false
 TabPlayer:CreateButton({
-	Name = "เปิด / ปิด เดินทะลุ",
+	Name = "เปิด/ปิด เดินทะลุ",
 	Callback = function()
-		noclipEnabled = not noclipEnabled
-		local status = noclipEnabled and "✅ เปิดใช้งาน" or "❌ ปิดแล้ว"
-		Rayfield:Notify({
-			Title = "Noclip",
-			Content = status,
-			Duration = 3
-		})
+		noclip = not noclip
+		Rayfield:Notify({Title="Noclip",Content=noclip and "✅ เปิดใช้งาน" or "❌ ปิดแล้ว",Duration=3})
 	end
 })
-
 RunService.Stepped:Connect(function()
-	if noclipEnabled and LP.Character then
-		for _, part in pairs(LP.Character:GetChildren()) do
-			if part:IsA("BasePart") then
-				part.CanCollide = false
-			end
+	if noclip and LP.Character then
+		for _, p in pairs(LP.Character:GetChildren()) do
+			if p:IsA("BasePart") then p.CanCollide = false end
 		end
 	end
 end)
 
--------------------------------------------------
--- 💡 FullBright
--------------------------------------------------
+-- FullBright
 TabPlayer:CreateSection("แสงสว่าง")
-
-local FullBrightEnabled = false
-local FBConnection
-
+local FullBright = false
+local fbConn
 TabPlayer:CreateButton({
-	Name = "🔆 เปิดโหมดแมพสว่าง (FullBright)",
+	Name = "🔆 FullBright",
 	Callback = function()
-		FullBrightEnabled = not FullBrightEnabled
-
-		if FullBrightEnabled then
-			FBConnection = RunService.RenderStepped:Connect(function()
+		FullBright = not FullBright
+		if FullBright then
+			fbConn = RunService.RenderStepped:Connect(function()
 				Lighting.Brightness = 2
 				Lighting.ClockTime = 14
 				Lighting.FogEnd = 1e10
 				Lighting.GlobalShadows = false
-				Lighting.OutdoorAmbient = Color3.new(1, 1, 1)
+				Lighting.OutdoorAmbient = Color3.new(1,1,1)
 			end)
-			Rayfield:Notify({
-				Title = "เปิด FullBright ☀️",
-				Content = "แมปสว่างถาวรแล้ว",
-				Duration = 2
-			})
+			Rayfield:Notify({Title="เปิด FullBright ☀️",Content="แมปสว่างถาวร",Duration=2})
 		else
-			if FBConnection then FBConnection:Disconnect() end
+			if fbConn then fbConn:Disconnect() end
 			Lighting.GlobalShadows = true
-			Rayfield:Notify({
-				Title = "ปิด FullBright 🌑",
-				Content = "กลับสู่สภาพปกติ",
-				Duration = 2
-			})
+			Rayfield:Notify({Title="ปิด FullBright 🌑",Content="กลับสู่ปกติ",Duration=2})
 		end
 	end
 })
 
--------------------------------------------------
--- 🕊️ ฟังก์ชันบิน
--------------------------------------------------
+-- Fly
 TabPlayer:CreateSection("ฟังก์ชันบิน")
 TabPlayer:CreateButton({
-	Name = "กดเพื่อเปิดสคริปต์บิน",
-	Callback = function()
-		local url = "https://gist.githubusercontent.com/meozoneYT/bf037dff9f0a70017304ddd67fdcd370/raw/e14e74f425b060df523343cf30b787074eb3c5d2/Arceus%20X%20Fly%20OBF.lua"
+	Name="เปิดสคริปต์บิน",
+	Callback=function()
+		local url="https://gist.githubusercontent.com/meozoneYT/bf037dff9f0a70017304ddd67fdcd370/raw/e14e74f425b060df523343cf30b787074eb3c5d2/Arceus%20X%20Fly%20OBF.lua"
 		loadstring(game:HttpGet(url))()
 	end
 })
 
 -------------------------------------------------
--- 🧭 เทเลพอร์ต / มองผู้เล่น
+-- 🧭 TabTP - วาร์ป, Spectate
 -------------------------------------------------
-TabTP:CreateSection("วาร์ป")
+TabTP:CreateSection("วาร์ป/มองผู้เล่น")
+local cam = workspace.CurrentCamera
+local target
+local spectate = false
 
-local player = LP
-local camera = workspace.CurrentCamera
-local targetPlayer
-local spectating = false
-
-local function GetPlayerList()
-	local names = {}
-	for _, plr in pairs(Players:GetPlayers()) do
-		if plr ~= player then
-			table.insert(names, plr.Name)
-		end
+local function GetPlayersList()
+	local t = {}
+	for _,plr in pairs(Players:GetPlayers()) do
+		if plr ~= LP then table.insert(t,plr.Name) end
 	end
-	return names
+	return t
 end
 
-local PlayerDropdown = TabTP:CreateDropdown({
-	Name = "เลือกผู้เล่น",
-	Options = GetPlayerList(),
-	CurrentOption = {},
-	MultipleOptions = false,
-	Flag = "PlayerTeleportDropdown",
-	Callback = function(Option)
-		targetPlayer = Players:FindFirstChild(Option[1])
+local Dropdown = TabTP:CreateDropdown({
+	Name="เลือกผู้เล่น",
+	Options=GetPlayersList(),
+	CurrentOption={},
+	MultipleOptions=false,
+	Flag="TPDropdown",
+	Callback=function(opt)
+		target = Players:FindFirstChild(opt[1])
 	end
 })
 
 TabTP:CreateButton({
-	Name = "⚡ วาร์ปไปหาผู้เล่น",
-	Callback = function()
-		if not targetPlayer then
-			return Rayfield:Notify({
-				Title = "⚠️ ยังไม่ได้เลือกผู้เล่น",
-				Content = "กรุณาเลือกชื่อจากรายการก่อน",
-				Duration = 2
-			})
+	Name="⚡ วาร์ปไปผู้เล่น",
+	Callback=function()
+		if not target then
+			return Rayfield:Notify({Title="⚠️ ยังไม่ได้เลือกผู้เล่น",Content="เลือกจาก Dropdown ก่อน",Duration=2})
 		end
-		local myChar = player.Character or player.CharacterAdded:Wait()
-		local myRoot = myChar:FindFirstChild("HumanoidRootPart")
-		local targetChar = targetPlayer.Character or targetPlayer.CharacterAdded:Wait()
-		local targetRoot = targetChar:FindFirstChild("HumanoidRootPart")
-
-		if myRoot and targetRoot then
-			myRoot.CFrame = targetRoot.CFrame + Vector3.new(0, 3, 0)
-			Rayfield:Notify({
-				Title = "✅ วาร์ปสำเร็จ!",
-				Content = "คุณถูกวาร์ปไปหา " .. targetPlayer.Name,
-				Duration = 2
-			})
-		else
-			Rayfield:Notify({
-				Title = "❌ วาร์ปล้มเหลว",
-				Content = "ไม่พบตำแหน่งของผู้เล่นเป้าหมาย",
-				Duration = 3
-			})
+		local char = LP.Character or LP.CharacterAdded:Wait()
+		local root = char:FindFirstChild("HumanoidRootPart")
+		local tchar = target.Character or target.CharacterAdded:Wait()
+		local troot = tchar:FindFirstChild("HumanoidRootPart")
+		if root and troot then
+			root.CFrame = troot.CFrame + Vector3.new(0,3,0)
+			Rayfield:Notify({Title="✅ วาร์ปสำเร็จ",Content="ไปหา "..target.Name,Duration=2})
 		end
 	end
 })
 
 TabTP:CreateButton({
-	Name = "👁️ เปิด / ปิดโหมดมองผู้เล่น",
-	Callback = function()
-		if not targetPlayer then
-			return Rayfield:Notify({
-				Title = "⚠️ ยังไม่ได้เลือกผู้เล่น",
-				Content = "กรุณาเลือกชื่อจาก Dropdown ก่อน",
-				Duration = 2
-			})
+	Name="👁️ Spectate",
+	Callback=function()
+		if not target then
+			return Rayfield:Notify({Title="⚠️ ยังไม่ได้เลือกผู้เล่น",Content="เลือกจาก Dropdown ก่อน",Duration=2})
 		end
-		spectating = not spectating
-		if spectating then
-			camera.CameraSubject = targetPlayer.Character:WaitForChild("Humanoid")
-			camera.CameraType = Enum.CameraType.Custom
-			Rayfield:Notify({
-				Title = "🎥 เริ่มมองผู้เล่น",
-				Content = "กำลังมอง: " .. targetPlayer.Name,
-				Duration = 2
-			})
-			targetPlayer.CharacterAdded:Connect(function(newChar)
-				if spectating then
-					task.wait(1)
-					camera.CameraSubject = newChar:WaitForChild("Humanoid")
-				end
+		spectate = not spectate
+		if spectate then
+			cam.CameraSubject = target.Character:WaitForChild("Humanoid")
+			cam.CameraType = Enum.CameraType.Custom
+			Rayfield:Notify({Title="🎥 Spectate",Content="กำลังมอง "..target.Name,Duration=2})
+			target.CharacterAdded:Connect(function(newC)
+				task.wait(0.5)
+				if spectate then cam.CameraSubject = newC:WaitForChild("Humanoid") end
 			end)
 		else
-			camera.CameraSubject = player.Character:WaitForChild("Humanoid")
-			camera.CameraType = Enum.CameraType.Custom
-			Rayfield:Notify({
-				Title = "👁️ หยุดมองผู้เล่น",
-				Content = "กลับมามองตัวเองแล้ว",
-				Duration = 2
-			})
+			cam.CameraSubject = LP.Character:WaitForChild("Humanoid")
+			cam.CameraType = Enum.CameraType.Custom
+			Rayfield:Notify({Title="👁️ หยุด Spectate",Content="กลับมามองตัวเอง",Duration=2})
 		end
 	end
 })
 
 Players.PlayerAdded:Connect(function()
 	task.wait(1)
-	PlayerDropdown:Refresh(GetPlayerList(), true)
+	Dropdown:Refresh(GetPlayersList(),true)
 end)
-
 Players.PlayerRemoving:Connect(function()
 	task.wait(1)
-	PlayerDropdown:Refresh(GetPlayerList(), true)
+	Dropdown:Refresh(GetPlayersList(),true)
 end)
 
--------------------------------------------------
--- 📦 โหลดการตั้งค่า
--------------------------------------------------
+-- โหลด Config
 Rayfield:LoadConfiguration()
-Rayfield:Notify({
-	Title = "FIKO HUB",
-	Content = "ระบบเมนูโหลดสำเร็จ ✅",
-	Duration = 4
-})
+Rayfield:Notify({Title="FIKO HUB",Content="ระบบเมนูโหลดสำเร็จ ✅",Duration=4})
