@@ -1,0 +1,305 @@
+-- 🧠 ส่วนหัวหลัก (FIKO HUB)
+-------------------------------------------------
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local Workspace = game:GetService("Workspace")
+local Lighting = game:GetService("Lighting")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local StarterGui = game:GetService("StarterGui")
+local VirtualUser = game:GetService("VirtualUser")
+local LP = Players.LocalPlayer
+
+-------------------------------------------------
+-- ⚙️ โหลด Rayfield UI
+-------------------------------------------------
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+-------------------------------------------------
+-- 🪟 สร้างหน้าต่างหลัก
+-------------------------------------------------
+local Window = Rayfield:CreateWindow({
+	Name = "FIKO HUB",
+	Icon = 0,
+	LoadingTitle = "เมนูหลัก",
+	LoadingSubtitle = "FIKO HUB",
+	Theme = "Default",
+
+	DisableRayfieldPrompts = true,
+	DisableBuildWarnings = true,
+
+	ConfigurationSaving = {
+		Enabled = true,
+		FolderName = "FIKO HUB",
+		FileName = "FIKO HUB"
+	},
+
+	Discord = {
+		Enabled = false,
+		Invite = "https://discord.gg/U8qEGaNe6E",
+		RememberJoins = true
+	},
+
+	KeySystem = false
+})
+
+-------------------------------------------------
+-- 📁 แท็บต่าง ๆ
+-------------------------------------------------
+local TabPlayer = Window:CreateTab("ผู้เล่น")
+local TabESP = Window:CreateTab("ESP")
+local TabTP = Window:CreateTab("TP")
+
+
+-------------------------------------------------
+-- ⚙️ ตั้งค่าความเร็ว + กระโดด
+-------------------------------------------------
+TabPlayer:CreateSection("ตั้งค่าต่างๆ")
+
+local SpeedSlider = TabPlayer:CreateSlider({
+	Name = "ปรับความเร็ว",
+	Range = {16, 700},
+	Increment = 1,
+	Suffix = "Speed",
+	CurrentValue = 16,
+	Callback = function(Value)
+		local humanoid = LP.Character and LP.Character:FindFirstChildOfClass("Humanoid")
+		if humanoid then
+			humanoid.WalkSpeed = Value
+		end
+	end
+})
+
+local JumpSlider = TabPlayer:CreateSlider({
+	Name = "ปรับความสูงการกระโดด",
+	Range = {50, 500},
+	Increment = 10,
+	Suffix = "Power",
+	CurrentValue = 50,
+	Callback = function(Value)
+		local humanoid = LP.Character and LP.Character:FindFirstChildOfClass("Humanoid")
+		if humanoid then
+			humanoid.UseJumpPower = true
+			humanoid.JumpPower = Value
+		end
+	end
+})
+
+TabPlayer:CreateButton({
+	Name = "รีเซ็ตค่าทั้งหมด",
+	Callback = function()
+		local humanoid = LP.Character and LP.Character:FindFirstChildOfClass("Humanoid")
+		if humanoid then
+			humanoid.WalkSpeed = 16
+			humanoid.JumpPower = 50
+		end
+		SpeedSlider:Set(16)
+		JumpSlider:Set(50)
+
+		Rayfield:Notify({
+			Title = "รีเซ็ตสำเร็จ!",
+			Content = "กลับไปค่าปกติแล้ว ✅",
+			Duration = 3,
+			Image = 4483362458
+		})
+	end
+})
+
+-------------------------------------------------
+-- 🧱 เดินทะลุ (Noclip)
+-------------------------------------------------
+TabPlayer:CreateSection("เดินทะลุ")
+
+local noclipEnabled = false
+
+TabPlayer:CreateButton({
+	Name = "เปิด / ปิด เดินทะลุ",
+	Callback = function()
+		noclipEnabled = not noclipEnabled
+		local status = noclipEnabled and "✅ เปิดใช้งาน" or "❌ ปิดแล้ว"
+		Rayfield:Notify({
+			Title = "Noclip",
+			Content = status,
+			Duration = 3
+		})
+	end
+})
+
+RunService.Stepped:Connect(function()
+	if noclipEnabled and LP.Character then
+		for _, part in pairs(LP.Character:GetChildren()) do
+			if part:IsA("BasePart") then
+				part.CanCollide = false
+			end
+		end
+	end
+end)
+
+-------------------------------------------------
+-- 💡 FullBright
+-------------------------------------------------
+TabPlayer:CreateSection("แสงสว่าง")
+
+local FullBrightEnabled = false
+local FBConnection
+
+TabPlayer:CreateButton({
+	Name = "🔆 เปิดโหมดแมพสว่าง (FullBright)",
+	Callback = function()
+		FullBrightEnabled = not FullBrightEnabled
+
+		if FullBrightEnabled then
+			FBConnection = RunService.RenderStepped:Connect(function()
+				Lighting.Brightness = 2
+				Lighting.ClockTime = 14
+				Lighting.FogEnd = 1e10
+				Lighting.GlobalShadows = false
+				Lighting.OutdoorAmbient = Color3.new(1, 1, 1)
+			end)
+			Rayfield:Notify({
+				Title = "เปิด FullBright ☀️",
+				Content = "แมปสว่างถาวรแล้ว",
+				Duration = 2
+			})
+		else
+			if FBConnection then FBConnection:Disconnect() end
+			Lighting.GlobalShadows = true
+			Rayfield:Notify({
+				Title = "ปิด FullBright 🌑",
+				Content = "กลับสู่สภาพปกติ",
+				Duration = 2
+			})
+		end
+	end
+})
+
+-------------------------------------------------
+-- 🕊️ ฟังก์ชันบิน
+-------------------------------------------------
+TabPlayer:CreateSection("ฟังก์ชันบิน")
+TabPlayer:CreateButton({
+	Name = "กดเพื่อเปิดสคริปต์บิน",
+	Callback = function()
+		local url = "https://gist.githubusercontent.com/meozoneYT/bf037dff9f0a70017304ddd67fdcd370/raw/e14e74f425b060df523343cf30b787074eb3c5d2/Arceus%20X%20Fly%20OBF.lua"
+		loadstring(game:HttpGet(url))()
+	end
+})
+
+-------------------------------------------------
+-- 🧭 เทเลพอร์ต / มองผู้เล่น
+-------------------------------------------------
+TabTP:CreateSection("วาร์ป")
+
+local player = LP
+local camera = workspace.CurrentCamera
+local targetPlayer
+local spectating = false
+
+local function GetPlayerList()
+	local names = {}
+	for _, plr in pairs(Players:GetPlayers()) do
+		if plr ~= player then
+			table.insert(names, plr.Name)
+		end
+	end
+	return names
+end
+
+local PlayerDropdown = TabTP:CreateDropdown({
+	Name = "เลือกผู้เล่น",
+	Options = GetPlayerList(),
+	CurrentOption = {},
+	MultipleOptions = false,
+	Flag = "PlayerTeleportDropdown",
+	Callback = function(Option)
+		targetPlayer = Players:FindFirstChild(Option[1])
+	end
+})
+
+TabTP:CreateButton({
+	Name = "⚡ วาร์ปไปหาผู้เล่น",
+	Callback = function()
+		if not targetPlayer then
+			return Rayfield:Notify({
+				Title = "⚠️ ยังไม่ได้เลือกผู้เล่น",
+				Content = "กรุณาเลือกชื่อจากรายการก่อน",
+				Duration = 2
+			})
+		end
+		local myChar = player.Character or player.CharacterAdded:Wait()
+		local myRoot = myChar:FindFirstChild("HumanoidRootPart")
+		local targetChar = targetPlayer.Character or targetPlayer.CharacterAdded:Wait()
+		local targetRoot = targetChar:FindFirstChild("HumanoidRootPart")
+
+		if myRoot and targetRoot then
+			myRoot.CFrame = targetRoot.CFrame + Vector3.new(0, 3, 0)
+			Rayfield:Notify({
+				Title = "✅ วาร์ปสำเร็จ!",
+				Content = "คุณถูกวาร์ปไปหา " .. targetPlayer.Name,
+				Duration = 2
+			})
+		else
+			Rayfield:Notify({
+				Title = "❌ วาร์ปล้มเหลว",
+				Content = "ไม่พบตำแหน่งของผู้เล่นเป้าหมาย",
+				Duration = 3
+			})
+		end
+	end
+})
+
+TabTP:CreateButton({
+	Name = "👁️ เปิด / ปิดโหมดมองผู้เล่น",
+	Callback = function()
+		if not targetPlayer then
+			return Rayfield:Notify({
+				Title = "⚠️ ยังไม่ได้เลือกผู้เล่น",
+				Content = "กรุณาเลือกชื่อจาก Dropdown ก่อน",
+				Duration = 2
+			})
+		end
+		spectating = not spectating
+		if spectating then
+			camera.CameraSubject = targetPlayer.Character:WaitForChild("Humanoid")
+			camera.CameraType = Enum.CameraType.Custom
+			Rayfield:Notify({
+				Title = "🎥 เริ่มมองผู้เล่น",
+				Content = "กำลังมอง: " .. targetPlayer.Name,
+				Duration = 2
+			})
+			targetPlayer.CharacterAdded:Connect(function(newChar)
+				if spectating then
+					task.wait(1)
+					camera.CameraSubject = newChar:WaitForChild("Humanoid")
+				end
+			end)
+		else
+			camera.CameraSubject = player.Character:WaitForChild("Humanoid")
+			camera.CameraType = Enum.CameraType.Custom
+			Rayfield:Notify({
+				Title = "👁️ หยุดมองผู้เล่น",
+				Content = "กลับมามองตัวเองแล้ว",
+				Duration = 2
+			})
+		end
+	end
+})
+
+Players.PlayerAdded:Connect(function()
+	task.wait(1)
+	PlayerDropdown:Refresh(GetPlayerList(), true)
+end)
+
+Players.PlayerRemoving:Connect(function()
+	task.wait(1)
+	PlayerDropdown:Refresh(GetPlayerList(), true)
+end)
+
+-------------------------------------------------
+-- 📦 โหลดการตั้งค่า
+-------------------------------------------------
+Rayfield:LoadConfiguration()
+Rayfield:Notify({
+	Title = "FIKO HUB",
+	Content = "ระบบเมนูโหลดสำเร็จ ✅",
+	Duration = 4
+})
